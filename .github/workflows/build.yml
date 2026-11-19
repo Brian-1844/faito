@@ -1,0 +1,98 @@
+name: Construire l'APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: build
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ github.run_number }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Installer Capacitor
+        run: npm install
+
+      - name: Écrire la version et l'adresse du dépôt dans l'app
+        run: |
+          OWNER=$(echo "${GITHUB_REPOSITORY%%/*}" | tr 'A-Z' 'a-z')
+          REPO=${GITHUB_REPOSITORY#*/}
+          echo "window.APP={version:${VERSION},repo:\"${GITHUB_REPOSITORY}\",pages:\"https://${OWNER}.github.io/${REPO}/\"};" > www/config.js
+          cat www/config.js
+          cp node_modules/@capacitor/core/dist/capacitor.js www/capacitor.js
+
+      - name: Créer le projet Android
+        run: npx cap add android
+
+      - name: Icônes
+        run: npx @capacitor/assets generate --android || echo "Icônes ignorées"
+
+      - name: Ajouter la mise à jour intégrée
+        run: bash scripts/patch-android.sh
+
+      - name: Synchroniser
+        run: npx cap sync android
+
+      - name: Compiler l'APK
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon
+
+      - name: Signer l'APK (toujours la même clé, sinon la mise à jour est refusée)
+        env:
+          KS_PASS: ${{ secrets.KEYSTORE_PASSWORD || 'faito2026' }}
+        run: |
+          BT=$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)
+          IN=android/app/build/outputs/apk/release/app-release-unsigned.apk
+          "$ANDROID_HOME/build-tools/$BT/zipalign" -f 4 "$IN" aligned.apk
+          "$ANDROID_HOME/build-tools/$BT/apksigner" sign \
+            --ks keystore/faito.jks --ks-key-alias faito \
+            --ks-pass "pass:$KS_PASS" --key-pass "pass:$KS_PASS" \
+            --out "faito-v${VERSION}.apk" aligned.apk
+          ls -lh faito-v*.apk
+
+      - name: Publier la Release (lue par le bouton MAJ)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.run_number }}
+          name: Fāito v${{ github.run_number }}
+          files: faito-v*.apk
+          make_latest: true
+
+      - name: Préparer la version web (caméra live + AR)
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: www
+
+  pages:
+    needs: build
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4
