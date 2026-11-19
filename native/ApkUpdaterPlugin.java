@@ -112,6 +112,30 @@ public class ApkUpdaterPlugin extends Plugin {
         call.resolve(new JSObject());
     }
 
+    private android.speech.tts.TextToSpeech tts;
+    private boolean ttsReady = false;
+
+    /** Lecture vocale (mode non-voyant). */
+    @PluginMethod
+    public void speak(PluginCall call) {
+        final String text = call.getString("text", "");
+        final float rate = call.getFloat("rate", 1f);
+        if (tts == null) {
+            tts = new android.speech.tts.TextToSpeech(getContext(), status -> {
+                ttsReady = status == android.speech.tts.TextToSpeech.SUCCESS;
+                if (ttsReady) {
+                    tts.setLanguage(java.util.Locale.FRENCH);
+                    tts.setSpeechRate(rate);
+                    tts.speak(text, android.speech.tts.TextToSpeech.QUEUE_FLUSH, null, "faito");
+                }
+            });
+        } else if (ttsReady) {
+            tts.setSpeechRate(rate);
+            tts.speak(text, android.speech.tts.TextToSpeech.QUEUE_FLUSH, null, "faito");
+        }
+        call.resolve();
+    }
+
     /** Ouvre une adresse dans Chrome (utile pour le mode AR / WebXR). */
     @PluginMethod
     public void openExternal(PluginCall call) {
