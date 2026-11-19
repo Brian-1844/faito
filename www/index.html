@@ -86,6 +86,18 @@ small{color:var(--mut)}
 #hello label{font-size:14px;color:#9fbcc3;display:flex;gap:8px;align-items:center;justify-content:center;margin-top:14px;min-height:44px}
 #hello .band2{color:#13a9b8;height:28px;width:100%;flex:none}
 @media(prefers-reduced-motion:no-preference){#hello .hb{animation:hin .35s ease}@keyframes hin{from{opacity:0;transform:translateY(12px)}}}
+.sbox{background:var(--card);border-radius:14px;padding:14px;margin:16px 0;border-left:6px solid #8f7aa8}
+.sbox h2{font:700 22px "Barlow Condensed";margin:0 0 2px}
+.sres{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;margin:12px 0 4px}
+.sres b{font:700 clamp(38px,10vw,54px)/1 "Barlow Condensed";color:#8f7aa8;white-space:nowrap}
+.sres span{color:var(--mut)}
+#sCv{display:block;width:100%;height:120px;border-radius:10px;background:var(--bg);margin:8px 0}
+.sbox input{font:600 16px Barlow,sans-serif;min-height:44px;width:90px;padding:0 10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.lbox{border-left-color:#e33b3b}.lbox h3{font:700 18px "Barlow Condensed";margin:14px 0 2px}
+.rbox{border-left-color:#13a9b8}
+#rCv{display:block;width:min(100%,360px);aspect-ratio:1;margin:10px auto;border-radius:50%;background:#0b1f24}
+#aBig{font:700 clamp(40px,11vw,60px)/1 "Barlow Condensed";white-space:nowrap}
+.aon{outline:4px solid #e9643a;outline-offset:2px}
 @media(prefers-reduced-motion:no-preference){.dot{transition:background .2s}}
 </style>
 </head>
@@ -134,6 +146,35 @@ small{color:var(--mut)}
     <input id="wFill" type="number" inputmode="numeric" min="1" max="100" value="100" style="width:110px"> <small>100 = plein. Baisse pour un objet creux (tuyau, caisse vide…).</small>
     <div class="wres"><b id="wKg">—</b><span id="wVol"></span></div>
     <small>Estimation : une petite erreur sur chaque dimension se multiplie, compte environ ±30 %.</small>
+  </section>
+  <section class="sbox" id="sbox">
+    <h2>Sonar : distance jusqu'à un mur</h2>
+    <p class="sub" style="margin:0">Le téléphone émet un bip et écoute l'écho. Vise un mur ou un grand meuble, de 40 cm à 5 m environ, dans une pièce calme.</p>
+    <div class="row"><button id="sOne" class="pri">🔊 Bip</button><button id="sFive">5 bips (plus fiable)</button></div>
+    <div class="sres"><b id="sDist">—</b><span id="sInfo">Appuie sur Bip</span></div>
+    <canvas id="sCv" aria-label="Échos reçus"></canvas>
+    <div class="row" style="align-items:center"><label for="sTemp" style="font-weight:600">Température (°C)</label><input id="sTemp" type="number" inputmode="decimal" value="27"><small>La vitesse du son en dépend.</small></div>
+    <small>Tiens le téléphone loin du corps, haut-parleur vers le mur, sans rien entre les deux. Les surfaces molles (rideaux, canapé) renvoient mal le son.</small>
+  </section>
+  <section class="sbox rbox" id="rbox">
+    <h2>Radar sonar, même dans le noir</h2>
+    <p class="sub" style="margin:0">Tiens le téléphone devant toi et tourne lentement sur toi-même : chaque écho devient un point sur le plan. Les murs apparaissent peu à peu.</p>
+    <div class="row"><button id="rGo" class="pri">Démarrer le radar</button><button id="aGo">Alerte obstacle</button><button id="rClr">Effacer</button></div>
+    <canvas id="rCv" aria-label="Plan radar autour de toi"></canvas>
+    <div class="sres" style="justify-content:center"><b id="aBig">—</b><span id="rInfo">Radar arrêté</span></div>
+    <small>Plan approximatif (±20 à 50 cm) : le sonar voit surtout l'obstacle le plus proche dans chaque direction. L'alerte fait vibrer le téléphone de plus en plus vite quand un obstacle approche (moins de 2 m).</small>
+  </section>
+  <section class="sbox lbox" id="lbox">
+    <h2>Pointeur laser (accessoire)</h2>
+    <p class="sub" style="margin:0">Fixe un petit pointeur laser rouge juste au-dessus ou en dessous de l'objectif, bien parallèle. La position du point rouge dans l'image donne la distance.</p>
+    <div class="row"><button id="lCam" class="pri">Démarrer la caméra laser</button><label class="btn">Analyser une photo<input id="lFile" type="file" accept="image/*" capture="environment"></label></div>
+    <div id="lView" hidden style="position:relative;margin:8px 0"><video id="lVid" playsinline muted style="display:block;width:100%;border-radius:14px;background:#000"></video><canvas id="lOv" style="position:absolute;inset:0;width:100%;height:100%"></canvas></div>
+    <div class="sres"><b id="lDist" style="color:#e33b3b">—</b><span id="lInfo">Calibre d'abord (une seule fois)</span></div>
+    <h3>Calibration</h3>
+    <p class="sub" style="margin:0">Pose le téléphone face à un mur, à une distance connue (mesurée au mètre), laser allumé, puis appuie sur le bouton. Fais-le à deux distances.</p>
+    <div class="row" style="align-items:center"><input id="lD1" type="number" inputmode="decimal" value="50" aria-label="Distance du point 1 en cm"> cm <button id="lC1">Point 1 ici</button></div>
+    <div class="row" style="align-items:center"><input id="lD2" type="number" inputmode="decimal" value="150" aria-label="Distance du point 2 en cm"> cm <button id="lC2">Point 2 ici</button></div>
+    <small id="lCal"></small>
   </section>
 
   <h2 style="font:700 22px 'Barlow Condensed';margin:20px 0 4px">Source</h2>
@@ -431,6 +472,7 @@ const STEPS=[
  {t:'1. Pose le repère jaune',p:['Glisse le doigt le long d\'un objet dont tu connais la taille : porte, feuille A4, carte bancaire…','Indique ensuite sa taille réelle, ou touche un préréglage.'],s:`<rect x="20" y="80" width="160" height="40" rx="8" fill="#ffc928"/>${[...Array(15)].map((_,i)=>`<rect x="${30+i*10}" y="80" width="3" height="${i%2?10:18}" fill="#0b1f24"/>`).join('')}<path d="M40 150h120" stroke="#ffc928" stroke-width="6" stroke-linecap="round"/><circle cx="40" cy="150" r="9" fill="#ffc928"/><circle cx="160" cy="150" r="9" fill="#ffc928"/>`},
  {t:'2. Mesure en bleu',p:['Glisse le doigt d\'un bout à l\'autre de ce que tu veux mesurer. La loupe t\'aide à viser juste.','Touche un point pour l\'ajuster. Le repère et l\'objet doivent être à la même distance.'],s:`<path d="M30 150L150 70" stroke="#13a9b8" stroke-width="7" stroke-linecap="round"/><circle cx="30" cy="150" r="10" fill="#13a9b8"/><circle cx="150" cy="70" r="10" fill="#13a9b8"/><circle cx="150" cy="70" r="34" fill="none" stroke="#fff" stroke-width="5"/><path d="M174 94l16 16" stroke="#fff" stroke-width="8" stroke-linecap="round"/><rect x="56" y="104" width="62" height="26" rx="7" fill="#13a9b8"/><text x="87" y="123" fill="#fff" font-size="16" font-weight="700" text-anchor="middle" font-family="sans-serif">45 cm</text>`},
  {t:'3. Estime le poids',p:['Mesure l\'objet <b>de face</b>, puis ouvre <b>Vue de côté</b> pour sa profondeur.','Choisis la forme et la matière, et Fāito calcule le poids : volume × densité.'],s:TURTLE},
+ {t:'4. Sonar',p:['Pas de photo ? Appuie sur <b>Bip</b> : le téléphone écoute l\'écho et donne la distance jusqu\'au mur.','Dans le noir, le <b>radar</b> dessine la pièce pendant que tu tournes sur toi-même.'],s:`${[40,70,100].map(r=>`<path d="M${60+r*0.2} ${100-r} A${r} ${r} 0 0 1 ${60+r*0.2} ${100+r}" fill="none" stroke="#8f7aa8" stroke-width="7" stroke-linecap="round" transform="translate(${r*0.6} 0)"/>`).join('')}<rect x="20" y="70" width="34" height="60" rx="8" fill="#13a9b8"/><rect x="170" y="30" width="12" height="140" fill="#ffc928"/>`},
  {t:'Mauruuru !',p:['Tu peux revoir ce tutoriel à tout moment avec le bouton <b>?</b> en haut.'],s:SUN}
 ];
 let hs=0;const hello=$('#hello');
@@ -446,6 +488,130 @@ $('#helpBtn').onclick=hOpen;
 let hx=null;hello.addEventListener('touchstart',e=>hx=e.touches[0].clientX,{passive:true});
 hello.addEventListener('touchend',e=>{if(hx==null)return;const dx=e.changedTouches[0].clientX-hx;hx=null;if(dx<-50)$('#hNext').click();else if(dx>50)$('#hPrev').click()});
 {let off=false;try{off=localStorage.getItem('faito-hello')==='off'}catch(e){};$('#hSkip').checked=off;if(!off)hOpen()}
+
+/* ---- Sonar : bip + écho (corrélation avec le bip émis) ---- */
+let SA=null;
+async function sInit(){
+  if(SA)return SA;
+  const st=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
+  const ac=new (window.AudioContext||window.webkitAudioContext)();await ac.resume();
+  const src=ac.createMediaStreamSource(st),pr=ac.createScriptProcessor(2048,1,1);let rec=null;
+  pr.onaudioprocess=e=>{if(rec)rec.push(new Float32Array(e.inputBuffer.getChannelData(0)))};
+  src.connect(pr);pr.connect(ac.destination);
+  const sr=ac.sampleRate,N=Math.round(sr*0.0015),T=N/sr,tpl=new Float32Array(N);
+  for(let i=0;i<N;i++){const t=i/sr;tpl[i]=Math.sin(2*Math.PI*(3000*t+12000*t*t/(2*T)))*(0.5-0.5*Math.cos(2*Math.PI*i/(N-1)))}
+  const buf=ac.createBuffer(1,N,sr);buf.getChannelData(0).set(tpl.map(x=>x*0.95));
+  SA={ac,sr,N,tpl,buf,start:()=>{rec=[]},stop:()=>{const r=rec;rec=null;const L=r.reduce((a,b)=>a+b.length,0),o=new Float32Array(L);let p=0;for(const b of r){o.set(b,p);p+=b.length}return o}};
+  return SA;
+}
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+async function ping(){
+  const S=await sInit();S.start();await wait(120);
+  const b=S.ac.createBufferSource();b.buffer=S.buf;b.connect(S.ac.destination);b.start();
+  await wait(260);const x=S.stop(),{N,tpl,sr}=S,M=x.length-N;if(M<100)throw new Error('enregistrement trop court');
+  const env=new Float32Array(M);for(let k=0;k<M;k++){let s=0;for(let i=0;i<N;i++)s+=x[k+i]*tpl[i];env[k]=Math.abs(s)}
+  let d=0;for(let k=1;k<M;k++)if(env[k]>env[d])d=k;
+  const c=347,vs=331.3+0.606*(+$('#sTemp').value||27),blank=N+Math.round(sr*0.0006),maxL=Math.round(sr*2*6/vs);
+  let e=-1,ev=0;for(let k=d+blank;k<Math.min(M,d+maxL);k++)if(env[k]>ev){ev=env[k];e=k}
+  const seg=Array.from(env.slice(d+blank,Math.min(M,d+maxL))).sort((a,b)=>a-b),floor=seg[Math.floor(seg.length/2)]||1e-9;
+  const m=e>0?(e-d)/sr*vs/2:null;
+  return {m,ok:e>0&&ev>floor*4,env,d,e,maxL,sr,vs,snr:ev/floor};
+}
+function sDraw(r){
+  const cv=$('#sCv'),W=cv.clientWidth,H=cv.clientHeight,dp=devicePixelRatio||1;cv.width=W*dp;cv.height=H*dp;const g=cv.getContext('2d');g.setTransform(dp,0,0,dp,0,0);g.clearRect(0,0,W,H);
+  if(!r)return;const a=r.d,b=Math.min(r.env.length,r.d+r.maxL),toX=k=>(k-a)/(b-a)*W;let peak=0;for(let k=a+Math.round(r.sr*0.004);k<b;k++)peak=Math.max(peak,r.env[k]);peak=peak||1;
+  g.strokeStyle='#8f7aa8';g.lineWidth=1.5;g.beginPath();for(let k=a;k<b;k+=2){const y=H-18-Math.min(1,r.env[k]/peak)*(H-28);k===a?g.moveTo(toX(k),y):g.lineTo(toX(k),y)}g.stroke();
+  g.fillStyle=getComputedStyle(document.body).color;g.font='12px Barlow,sans-serif';for(let mtr=0;mtr<=6;mtr++){const x=toX(a+mtr*2/r.vs*r.sr);g.fillText(mtr+' m',Math.min(W-24,x+2),H-3)}
+  if(r.e>0){const x=toX(r.e);g.strokeStyle=r.ok?'#e9643a':'#999';g.lineWidth=2;g.setLineDash([4,3]);g.beginPath();g.moveTo(x,0);g.lineTo(x,H-16);g.stroke();g.setLineDash([])}
+}
+async function sRun(n){
+  const bt=[$('#sOne'),$('#sFive')];bt.forEach(b=>b.disabled=true);$('#sInfo').textContent='Écoute…';
+  try{const res=[];let last=null;
+    for(let i=0;i<n;i++){const r=await ping();last=r;if(r.ok)res.push(r.m);$('#sInfo').textContent=`Bip ${i+1}/${n}`;await wait(120)}
+    sDraw(last);
+    if(!res.length){$('#sDist').textContent='—';$('#sInfo').textContent='Pas d\'écho clair. Rapproche-toi du mur ou réduis le bruit.';}
+    else{res.sort((a,b)=>a-b);const med=res[Math.floor(res.length/2)],sp=res.length>1?(res[res.length-1]-res[0])/2:0;
+      $('#sDist').textContent='≈ '+fmt(med*100);$('#sInfo').textContent=res.length>1?`${res.length}/${n} échos · écart ±${fmt(sp*100)}`:'1 écho · refais 5 bips pour vérifier';}
+  }catch(e){$('#sDist').textContent='—';$('#sInfo').textContent=e.name==='NotAllowedError'||e.name==='SecurityError'?'Micro bloqué ici. Le sonar marche dans l\'APK ou sur la version GitHub Pages.':'Erreur : '+e.message}
+  bt.forEach(b=>b.disabled=false);
+}
+$('#sOne').onclick=()=>sRun(1);$('#sFive').onclick=()=>sRun(5);
+
+/* ---- Pointeur laser : triangulation (point rouge + écart laser/objectif) ---- */
+const LZ={c1:null,c2:null,last:null,run:false,stream:null};
+try{const s=JSON.parse(localStorage.getItem('faito-laser')||'{}');LZ.c1=s.c1||null;LZ.c2=s.c2||null}catch(e){}
+const lcv=document.createElement('canvas'),lg=lcv.getContext('2d',{willReadFrequently:true});
+function lDetect(src,w,h){
+  const W=320,H=Math.max(1,Math.round(h/w*W));lcv.width=W;lcv.height=H;lg.drawImage(src,0,0,W,H);
+  const d=lg.getImageData(0,0,W,H).data;let mx=0;const sc=new Float32Array(W*H);
+  for(let i=0,j=0;i<d.length;i+=4,j++){const r=d[i],g=d[i+1],b=d[i+2],s=r>140?r-(g+b)/2:0;sc[j]=s;if(s>mx)mx=s}
+  if(mx<50)return null;let sx=0,sy=0,n=0;
+  for(let j=0;j<sc.length;j++)if(sc[j]>mx*0.8){sx+=j%W;sy+=Math.floor(j/W);n++}
+  if(n>W*H*0.02)return null;return{x:sx/n/W,y:sy/n/H};
+}
+function lCalc(p){const{c1,c2}=LZ;if(!c1||!c2||c1.d===c2.d)return null;const fh=(c1.p-c2.p)/(1/c1.d-1/c2.d),pi=c1.p-fh/c1.d,D=fh/(p-pi);return isFinite(D)&&D>0&&D<5000?D:null}
+function lCalInfo(){$('#lCal').textContent=(LZ.c1?`Point 1 : ${LZ.c1.d} cm ✓  `:'Point 1 : à faire  ')+(LZ.c2?`Point 2 : ${LZ.c2.d} cm ✓`:'Point 2 : à faire')}
+function lShow(det){
+  if(!det){LZ.last=null;$('#lDist').textContent='—';$('#lInfo').textContent='Point laser non trouvé (essaie dans un endroit moins éclairé)';return}
+  LZ.last=det.y-0.5;const D=lCalc(LZ.last);
+  $('#lDist').textContent=D?'≈ '+fmt(D):'—';$('#lInfo').textContent=D?'Point laser détecté':'Point détecté · calibration incomplète';
+}
+function lLoop(){
+  if(!LZ.run)return;const v=$('#lVid'),o=$('#lOv');
+  if(v.videoWidth){const det=lDetect(v,v.videoWidth,v.videoHeight);lShow(det);
+    const W=o.clientWidth,H=o.clientHeight,dp=devicePixelRatio||1;o.width=W*dp;o.height=H*dp;const g=o.getContext('2d');g.setTransform(dp,0,0,dp,0,0);
+    g.strokeStyle='#fff8';g.lineWidth=1;g.beginPath();g.moveTo(W/2,0);g.lineTo(W/2,H);g.moveTo(0,H/2);g.lineTo(W,H/2);g.stroke();
+    if(det){g.strokeStyle='#ffc928';g.lineWidth=3;g.beginPath();g.arc(det.x*W,det.y*H,14,0,7);g.stroke()}}
+  requestAnimationFrame(lLoop);
+}
+$('#lCam').onclick=async()=>{
+  if(LZ.run){LZ.run=false;LZ.stream&&LZ.stream.getTracks().forEach(t=>t.stop());$('#lView').hidden=true;$('#lCam').textContent='Démarrer la caméra laser';return}
+  try{LZ.stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false});const v=$('#lVid');v.srcObject=LZ.stream;await v.play();
+    $('#lView').hidden=false;LZ.run=true;$('#lCam').textContent='Arrêter la caméra';lLoop()}
+  catch(e){$('#lInfo').textContent='Caméra bloquée ici. Utilise « Analyser une photo », ou l\'APK.'}
+};
+$('#lFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const i=new Image();i.onload=()=>lShow(lDetect(i,i.width,i.height));i.src=URL.createObjectURL(f)};
+function lSet(k,inp){if(LZ.last==null){$('#lInfo').textContent='Aucun point laser détecté pour calibrer';return}
+  LZ[k]={d:+$(inp).value||0,p:LZ.last};try{localStorage.setItem('faito-laser',JSON.stringify({c1:LZ.c1,c2:LZ.c2}))}catch(e){}lCalInfo();lShow({x:.5,y:LZ.last+.5})}
+$('#lC1').onclick=()=>lSet('c1','#lD1');$('#lC2').onclick=()=>lSet('c2','#lD2');lCalInfo();
+
+/* ---- Radar sonar + alerte obstacle ---- */
+const RD={pts:[],head:0,ori:false,radar:false,alert:false,loop:false};
+function onOri(e){let h=null;if(e.webkitCompassHeading!=null)h=e.webkitCompassHeading;else if(e.alpha!=null)h=360-e.alpha;if(h!=null){RD.head=(h+360)%360;RD.ori=true}}
+addEventListener('deviceorientationabsolute',onOri);addEventListener('deviceorientation',e=>{if(!e.absolute&&RD.ori&&RD.abs)return;onOri(e)});
+function rDraw(){
+  const cv=$('#rCv'),S=cv.clientWidth,dp=devicePixelRatio||1;if(!S)return;cv.width=cv.height=S*dp;const g=cv.getContext('2d');g.setTransform(dp,0,0,dp,0,0);
+  const c=S/2,R=c-16,MX=5,now=Date.now();g.clearRect(0,0,S,S);
+  g.strokeStyle='#24505c';g.fillStyle='#9fbcc3';g.font='11px Barlow,sans-serif';g.lineWidth=1;
+  for(let m=1;m<=MX;m++){g.beginPath();g.arc(c,c,m/MX*R,0,7);g.stroke();g.fillText(m+' m',c+3,c-m/MX*R+12)}
+  g.beginPath();g.moveTo(c,c-R);g.lineTo(c,c+R);g.moveTo(c-R,c);g.lineTo(c+R,c);g.stroke();
+  const a=RD.head*Math.PI/180,gr=g.createRadialGradient(c,c,0,c,c,R);gr.addColorStop(0,'#13a9b800');gr.addColorStop(1,'#13a9b855');
+  g.fillStyle=gr;g.beginPath();g.moveTo(c,c);g.arc(c,c,R,a-Math.PI/2-0.35,a-Math.PI/2+0.35);g.fill();
+  for(const p of RD.pts){const age=(now-p.t)/60000,al=Math.max(0.25,1-age),r=Math.min(p.d,MX)/MX*R,an=p.a*Math.PI/180;
+    g.fillStyle=`rgba(255,201,40,${al})`;g.beginPath();g.arc(c+Math.sin(an)*r,c-Math.cos(an)*r,4,0,7);g.fill()}
+  g.fillStyle='#e9643a';g.beginPath();g.moveTo(c+Math.sin(a)*12,c-Math.cos(a)*12);g.lineTo(c+Math.sin(a+2.5)*8,c-Math.cos(a+2.5)*8);g.lineTo(c+Math.sin(a-2.5)*8,c-Math.cos(a-2.5)*8);g.fill();
+}
+function rBtns(){$('#rGo').textContent=RD.radar?'Arrêter le radar':'Démarrer le radar';$('#aGo').classList.toggle('aon',RD.alert);$('#aGo').textContent=RD.alert?'Alerte : activée':'Alerte obstacle'}
+async function rLoop(){
+  if(RD.loop)return;RD.loop=true;
+  try{if(window.DeviceOrientationEvent&&DeviceOrientationEvent.requestPermission)await DeviceOrientationEvent.requestPermission().catch(()=>{})}catch(e){}
+  while(RD.radar||RD.alert){
+    let r;try{r=await ping()}catch(e){$('#rInfo').textContent=e.name==='NotAllowedError'||e.name==='SecurityError'?'Micro bloqué ici. Le radar marche dans l\'APK.':'Erreur : '+e.message;RD.radar=RD.alert=false;break}
+    if(r.ok&&r.m<=6){
+      if(RD.radar){RD.pts.push({a:RD.head,d:r.m,t:Date.now()});if(RD.pts.length>500)RD.pts.shift()}
+      const big=$('#aBig');big.textContent=fmt(r.m*100);big.style.color=r.m<0.6?'#e33b3b':r.m<1.2?'#e9643a':'#13a9b8';
+      if(RD.alert&&r.m<2&&navigator.vibrate)navigator.vibrate(r.m<0.6?250:r.m<1.2?90:30);
+      $('#rInfo').textContent=(RD.radar?`${RD.pts.length} points`:'Alerte active')+(RD.ori?'':' · boussole indisponible');
+    }else $('#rInfo').textContent='Pas d\'écho clair dans cette direction';
+    rDraw();await wait(RD.alert&&r&&r.ok&&r.m<1.2?40:120);
+  }
+  RD.loop=false;rBtns();rDraw();if(!RD.radar)$('#rInfo').textContent=RD.pts.length?`Radar arrêté · ${RD.pts.length} points`:'Radar arrêté';
+}
+$('#rGo').onclick=()=>{RD.radar=!RD.radar;rBtns();rLoop()};
+$('#aGo').onclick=()=>{RD.alert=!RD.alert;rBtns();rLoop()};
+$('#rClr').onclick=()=>{RD.pts=[];rDraw()};
+new ResizeObserver(rDraw).observe($('#rCv'));
+setInterval(()=>{if(RD.loop)rDraw()},200);
 
 /* Démo au chargement : porte = repère, table mesurée */
 img=sample();ref={a:{x:415,y:150},b:{x:415,y:760}};lines=[{a:{x:620,y:465},b:{x:1020,y:465}},{a:{x:1040,y:480},b:{x:1040,y:760}}];mode='mes';
