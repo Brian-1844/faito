@@ -9,7 +9,7 @@ cp native/file_paths.xml android/app/src/main/res/xml/file_paths.xml
 
 M=android/app/src/main/AndroidManifest.xml
 if ! grep -q REQUEST_INSTALL_PACKAGES "$M"; then
-  sed -i 's#</manifest>#    <uses-permission android:name="android.permission.CAMERA" />\n    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />\n    <uses-feature android:name="android.hardware.camera" android:required="false" />\n</manifest>#' "$M"
+  sed -i 's#</manifest>#    <uses-permission android:name="android.permission.CAMERA" />\n    <uses-permission android:name="android.permission.RECORD_AUDIO" />\n    <uses-permission android:name="android.permission.VIBRATE" />\n    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />\n    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />\n    <uses-feature android:name="android.hardware.camera" android:required="false" />\n</manifest>#' "$M"
 fi
 grep -q REQUEST_INSTALL_PACKAGES "$M" || { echo "Échec du patch du manifeste"; exit 1; }
 
