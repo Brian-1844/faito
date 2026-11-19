@@ -1,0 +1,8 @@
+{
+  "appId": "pf.brian.faito",
+  "appName": "Fāito",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": false
+  }
+}

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fāito — mesure</title>
+<script src="config.js"></script>
+<script src="capacitor.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: outil de chantier, direct et précis
+   IDEA: un mètre ruban posé sur la photo
+   PICTURE: la photo elle-même, avec ruban jaune (référence) et traits lagon (mesures)
+   COLOUR and TYPE: fond blanc / nuit lagon, jaune ruban, bleu lagon ; Barlow Condensed pour les chiffres
+   LAYOUT: titre modeste, image en haut, commandes dessous en une colonne */
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#0b1f24);--card:light-dark(#eef4f5,#12303a);--ink:light-dark(#10232a,#e9f4f5);--mut:light-dark(#4d6770,#9fbcc3);--tape:#ffc928;--lag:#13a9b8;--line:light-dark(#cfdde0,#24505c)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Barlow,system-ui,sans-serif;overflow-x:clip}
+.band{padding:clamp(16px,3vw,40px) max(4vw,14px);max-width:1100px;margin:0 auto}
+h1{font:700 34px/1.05 "Barlow Condensed",sans-serif;margin:0 0 4px;text-wrap:balance}
+h1 span{color:var(--mut);font-weight:600}
+.sub{color:var(--mut);margin:0 0 14px}
+.fig{position:relative;border-radius:14px;overflow:hidden;background:#000;touch-action:none;display:flex;justify-content:center}
+#cv{display:block;touch-action:none;cursor:crosshair}
+.step{display:flex;gap:10px;align-items:center;margin:12px 0;font-weight:600}
+.dot{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font:700 16px "Barlow Condensed";color:#10232a;background:var(--tape)}
+.dot.m{background:var(--lag);color:#fff}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+button,.btn{font:600 15px Barlow,sans-serif;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+button:focus-visible,.btn:focus-within,input:focus-visible{outline:3px solid var(--lag);outline-offset:2px}
+button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+button.pri{background:var(--lag);color:#fff;border-color:var(--lag)}
+.btn input{position:absolute;opacity:0;width:1px;height:1px}
+.chip{min-height:38px;padding:0 12px;font-size:14px;border-radius:99px}
+.refbox{background:var(--card);border-radius:14px;padding:12px 14px;margin:12px 0;border-left:6px solid var(--tape)}
+.refbox label{font-weight:600;display:block;margin-bottom:6px}
+.refbox input{font:700 22px "Barlow Condensed";width:120px;min-height:44px;padding:0 10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+#list{list-style:none;padding:0;margin:8px 0;display:grid;gap:6px}
+#list li{display:flex;justify-content:space-between;align-items:center;background:var(--card);border-radius:10px;padding:6px 12px;border-left:6px solid var(--lag)}
+#list b{font:700 22px "Barlow Condensed";white-space:nowrap}
+#note{min-height:1.4em;color:var(--mut);font-size:15px}
+#vidwrap{display:none;margin:12px 0}#vidwrap video{width:100%;max-height:50vh;border-radius:14px;background:#000}
+details{margin-top:18px;background:var(--card);border-radius:14px;padding:10px 14px}
+summary{font-weight:600;cursor:pointer;min-height:32px}
+details li{margin:4px 0}
+small{color:var(--mut)}
+#arov{position:fixed;inset:0;z-index:9}#arov[hidden]{display:none}
+#arcv{position:absolute;inset:0;width:100%;height:100%}
+#arbar{position:absolute;left:0;right:0;bottom:24px;display:flex;justify-content:center;gap:10px}
+#arbar button{background:#0b1f24cc;color:#fff;border-color:#fff4}
+#artip{position:absolute;top:20px;left:0;right:0;text-align:center;color:#fff;font-weight:600;text-shadow:0 1px 3px #000}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+#upBtn{position:relative;flex:none}#upBtn[hidden]{display:none}
+#upBtn .badge{position:absolute;top:-4px;right:-4px;width:14px;height:14px;border-radius:50%;background:#ff4d4d;border:2px solid var(--bg);display:none}
+#upBtn.new .badge{display:block}
+#upModal{position:fixed;inset:0;z-index:20;background:#0008;display:grid;place-items:center;padding:16px}#upModal[hidden]{display:none}
+.upCard{background:var(--bg);color:var(--ink);border-radius:16px;padding:20px;width:min(420px,100%);box-shadow:0 10px 40px #0006}
+.upCard h3{font:700 24px "Barlow Condensed";margin:0 0 6px}
+.bar{height:16px;border-radius:99px;background:var(--card);overflow:hidden;margin:14px 0 6px;border:1px solid var(--line)}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--lag),#5fd6e0);transition:width .15s}
+#upPct{font:700 20px "Barlow Condensed";display:flex;justify-content:space-between}
+#upVer{color:var(--mut);font-size:14px}
+@media(prefers-reduced-motion:no-preference){.dot{transition:background .2s}}
+</style>
+</head>
+<body>
+<main class="band">
+  <div class="top">
+    <h1>Fāito <span>· mesurer sur une image</span></h1>
+    <button id="upBtn" hidden aria-label="Mise à jour"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 3v12M6 10l6 6 6-6M4 20h16"/></svg>MAJ<span class="badge"></span></button>
+  </div>
+  <p class="sub">Trace un repère sur un objet de taille connue, puis mesure le reste.</p>
+
+  <div class="fig" id="fig"><canvas id="cv" aria-label="Image à mesurer"></canvas></div>
+
+  <div class="step" id="step"><span class="dot" id="dot">1</span><span id="steptxt"></span></div>
+  <div class="row">
+    <button id="mRef">📏 Repère de référence</button>
+    <button id="mMes">Mesurer</button>
+    <button id="undo">Annuler</button>
+    <button id="clear">Tout effacer</button>
+  </div>
+
+  <div class="refbox">
+    <label for="reflen">Taille réelle du repère jaune (cm)</label>
+    <div class="row" style="margin:0;align-items:center">
+      <input id="reflen" type="number" inputmode="decimal" min="0.1" step="0.1" value="204">
+      <span id="refinfo" class="sub" style="margin:0"></span>
+    </div>
+    <div class="row" id="presets"></div>
+  </div>
+
+  <ul id="list"></ul>
+
+  <h2 style="font:700 22px 'Barlow Condensed';margin:20px 0 4px">Source</h2>
+  <div class="row">
+    <label class="btn">Prendre une photo<input id="fCam" type="file" accept="image/*" capture="environment"></label>
+    <label class="btn">Ouvrir photo ou vidéo<input id="fOpen" type="file" accept="image/*,video/*"></label>
+    <button id="live">Caméra en direct</button>
+    <button id="ar" class="pri">Mesure AR live</button>
+  </div>
+  <div id="vidwrap">
+    <video id="vid" playsinline controls muted></video>
+    <div class="row"><button id="grab" class="pri">Utiliser cette image</button><button id="vclose">Fermer</button></div>
+  </div>
+  <p id="note"></p>
+
+  <details>
+    <summary>Conseils de précision</summary>
+    <ul>
+      <li>Le repère et l'objet mesuré doivent être <b>à la même distance</b> de l'appareil (même mur, même plan).</li>
+      <li>Photographie bien <b>en face</b> : un angle déforme les longueurs.</li>
+      <li>Un repère long (porte, mètre ruban) donne une mesure plus juste qu'un petit (carte).</li>
+      <li>Le mode <b>AR live</b> mesure en 3D sans repère (Chrome Android avec ARCore). Il ne marche pas dans l'aperçu Claude : publie la page sur GitHub Pages pour l'utiliser.</li>
+    </ul>
+  </details>
+  <p><small>Image d'exemple dessinée : la porte (204 cm) sert de repère.</small></p>
+</main>
+
+<div id="upModal" hidden role="dialog" aria-modal="true" aria-labelledby="upTitle">
+  <div class="upCard">
+    <h3 id="upTitle">Mise à jour</h3>
+    <div id="upVer"></div>
+    <p id="upMsg">Recherche…</p>
+    <div class="bar" id="upBarBox" hidden><i id="upBar"></i></div>
+    <div id="upPct" hidden><span id="upP">0 %</span><span id="upMb"></span></div>
+    <div class="row"><button id="upGo" class="pri" hidden>Télécharger et installer</button><button id="upClose">Fermer</button></div>
+  </div>
+</div>
+
+<div id="arov" hidden>
+  <canvas id="arcv"></canvas>
+  <div id="artip">Vise le sol ou une surface, touche pour poser un point</div>
+  <div id="arbar"><button id="arUndo">Annuler</button><button id="arQuit">Quitter</button></div>
+</div>
+
+<script>
+{
+const $=s=>document.querySelector(s);
+const cv=$('#cv'),ctx=cv.getContext('2d'),fig=$('#fig');
+const CAP=window.Capacitor,NATIVE=!!(CAP&&CAP.isNativePlatform&&CAP.isNativePlatform());
+const UP=NATIVE?((CAP.Plugins&&CAP.Plugins.ApkUpdater)||(CAP.registerPlugin&&CAP.registerPlugin('ApkUpdater'))):null;
+const PRE=[['Porte',204],['A4 long',29.7],['A4 court',21],['Carte bancaire',8.56],['Marche',17],['1 m',100]];
+let img=null,ref=null,lines=[],mode='ref',drag=null,s=1,dpr=1,loupe=null;
+const fmt=cm=>cm>=100?(cm/100).toFixed(2).replace('.',',')+' m':cm.toFixed(1).replace('.',',')+' cm';
+const len=l=>Math.hypot(l.b.x-l.a.x,l.b.y-l.a.y);
+const cmOf=l=>ref&&len(ref)>0?len(l)*(+$('#reflen').value||0)/len(ref):null;
+const note=t=>$('#note').textContent=t;
+
+function sample(){
+  const c=document.createElement('canvas');c.width=1200;c.height=900;const g=c.getContext('2d');
+  let gr=g.createLinearGradient(0,0,0,760);gr.addColorStop(0,'#e7d9c4');gr.addColorStop(1,'#d6c3a6');g.fillStyle=gr;g.fillRect(0,0,1200,760);
+  g.fillStyle='#8a6a4a';g.fillRect(0,760,1200,140);g.fillStyle='#7a5c3f';for(let x=0;x<1200;x+=120)g.fillRect(x,760,3,140);
+  g.fillStyle='#5b3a24';g.fillRect(150,150,250,610);g.fillStyle='#6f4a30';g.fillRect(170,170,210,590);
+  g.fillStyle='#53341f';g.fillRect(190,200,170,230);g.fillRect(190,470,170,260);
+  g.fillStyle='#e0b44a';g.beginPath();g.arc(350,470,10,0,7);g.fill();
+  g.fillStyle='#2f6f78';g.fillRect(620,480,400,30);g.fillStyle='#255a61';g.fillRect(640,510,24,250);g.fillRect(976,510,24,250);
+  g.fillStyle='#e9643a';g.fillRect(700,420,70,60);g.fillStyle='#4a9a3a';g.beginPath();g.ellipse(900,440,40,50,0,0,7);g.fill();g.fillStyle='#8c4b2a';g.fillRect(880,460,40,20);
+  g.fillStyle='#fff';g.fillRect(560,190,300,200);g.fillStyle='#9fd3dc';g.fillRect(575,205,270,170);
+  return c;
+}
+function fit(){
+  if(!img)return;dpr=window.devicePixelRatio||1;
+  const W=fig.clientWidth,H=Math.max(260,innerHeight*0.62),iw=img.width||img.videoWidth,ih=img.height||img.videoHeight;
+  s=Math.min(W/iw,H/ih);cv.style.width=iw*s+'px';cv.style.height=ih*s+'px';cv.width=Math.round(iw*s*dpr);cv.height=Math.round(ih*s*dpr);draw();
+}
+function seg(l,col,label){
+  const w=1/s;ctx.lineCap='round';
+  ctx.strokeStyle='#0009';ctx.lineWidth=7*w;line(l);ctx.strokeStyle=col;ctx.lineWidth=4*w;line(l);
+  for(const p of[l.a,l.b]){ctx.fillStyle=col;ctx.beginPath();ctx.arc(p.x,p.y,7*w,0,7);ctx.fill();ctx.strokeStyle='#000';ctx.lineWidth=2*w;ctx.stroke()}
+  if(!label)return;
+  const mx=(l.a.x+l.b.x)/2,my=(l.a.y+l.b.y)/2;ctx.font=`700 ${20*w}px "Barlow Condensed",sans-serif`;
+  const tw=ctx.measureText(label).width+14*w,th=28*w;
+  ctx.fillStyle=col;ctx.beginPath();ctx.roundRect(mx-tw/2,my-th-12*w,tw,th,8*w);ctx.fill();
+  ctx.fillStyle=col===getTape()?'#10232a':'#fff';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(label,mx,my-th/2-12*w);
+}
+const getTape=()=>'#ffc928';
+function line(l){ctx.beginPath();ctx.moveTo(l.a.x,l.a.y);ctx.lineTo(l.b.x,l.b.y);ctx.stroke()}
+function draw(){
+  ctx.setTransform(dpr*s,0,0,dpr*s,0,0);ctx.drawImage(img,0,0);
+  if(ref)seg(ref,getTape(),'Réf. '+fmt(+$('#reflen').value||0));
+  lines.forEach((l,i)=>{const c=cmOf(l);seg(l,'#13a9b8',c==null?'?':fmt(c))});
+  if(loupe){
+    ctx.setTransform(dpr,0,0,dpr,0,0);const R=58,z=3,cw=cv.width/dpr,sx=loupe.x*s<cw/2?cw-R-10:R+10,sy=R+10;
+    ctx.save();ctx.beginPath();ctx.arc(sx,sy,R,0,7);ctx.clip();const k=R/(s*z);
+    ctx.drawImage(img,loupe.x-k,loupe.y-k,2*k,2*k,sx-R,sy-R,2*R,2*R);ctx.restore();
+    ctx.strokeStyle='#fff';ctx.lineWidth=3;ctx.beginPath();ctx.arc(sx,sy,R,0,7);ctx.stroke();
+    ctx.strokeStyle='#ff3b3b';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(sx-14,sy);ctx.lineTo(sx+14,sy);ctx.moveTo(sx,sy-14);ctx.lineTo(sx,sy+14);ctx.stroke();
+  }
+  ui();
+}
+function ui(){
+  $('#mRef').classList.toggle('on',mode==='ref');$('#mMes').classList.toggle('on',mode==='mes');
+  $('#dot').textContent=mode==='ref'?'1':'2';$('#dot').classList.toggle('m',mode==='mes');
+  $('#steptxt').textContent=mode==='ref'?'Glisse le doigt le long d\'un objet de taille connue':'Glisse le doigt pour mesurer. Touche un point pour l\'ajuster.';
+  $('#refinfo').textContent=ref?'':'aucun repère tracé';
+  $('#list').innerHTML=lines.map((l,i)=>{const c=cmOf(l);return `<li><span>Mesure ${i+1}</span><b>${c==null?'—':fmt(c)}</b></li>`}).join('');
+}
+const pt=e=>{const r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)/s,y:(e.clientY-r.top)/s}};
+cv.addEventListener('pointerdown',e=>{
+  if(!img)return;cv.setPointerCapture(e.pointerId);const p=pt(e),near=22/s;
+  for(const l of[ref,...lines].filter(Boolean))for(const k of['a','b'])if(Math.hypot(l[k].x-p.x,l[k].y-p.y)<near){drag={l,k,isNew:false};loupe=l[k];draw();return}
+  const l={a:p,b:{...p}};if(mode==='ref'){ref=l}else lines.push(l);drag={l,k:'b',isNew:true};loupe=p;draw();
+});
+cv.addEventListener('pointermove',e=>{if(!drag)return;const p=pt(e);drag.l[drag.k].x=p.x;drag.l[drag.k].y=p.y;loupe=p;draw()});
+const up=()=>{if(!drag)return;const l=drag.l;
+  if(drag.isNew&&len(l)*s<10){if(l===ref)ref=null;else lines.pop()}
+  else if(drag.isNew&&l===ref){mode='mes';$('#reflen').focus({preventScroll:true});note('Repère posé. Vérifie sa taille réelle, puis mesure.')}
+  drag=null;loupe=null;draw()};
+cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
+
+$('#mRef').onclick=()=>{mode='ref';ui()};$('#mMes').onclick=()=>{if(!ref)return note('Trace d\'abord le repère jaune.');mode='mes';ui()};
+$('#undo').onclick=()=>{if(lines.length)lines.pop();else{ref=null;mode='ref'}draw()};
+$('#clear').onclick=()=>{ref=null;lines=[];mode='ref';draw()};
+$('#reflen').oninput=draw;
+$('#presets').innerHTML=PRE.map(([n,v])=>`<button class="chip" data-v="${v}">${n} · ${String(v).replace('.',',')}</button>`).join('');
+$('#presets').onclick=e=>{const b=e.target.closest('button');if(!b)return;$('#reflen').value=b.dataset.v;draw()};
+
+function setImg(src){img=src;ref=null;lines=[];mode='ref';fit();fig.scrollIntoView({behavior:'smooth',block:'start'})}
+const vid=$('#vid');
+function openFile(f){
+  if(!f)return;const u=URL.createObjectURL(f);
+  if(f.type.startsWith('video')){stopLive();vid.srcObject=null;vid.src=u;vid.controls=true;$('#vidwrap').style.display='block';note('Mets la vidéo sur pause au bon moment, puis « Utiliser cette image ».')}
+  else{const i=new Image();i.onload=()=>{setImg(i);note('Photo chargée. Trace le repère.')};i.src=u}
+}
+$('#fCam').onchange=e=>openFile(e.target.files[0]);$('#fOpen').onchange=e=>openFile(e.target.files[0]);
+$('#grab').onclick=()=>{if(!vid.videoWidth)return note('Vidéo pas encore prête.');const c=document.createElement('canvas');c.width=vid.videoWidth;c.height=vid.videoHeight;c.getContext('2d').drawImage(vid,0,0);vid.pause();setImg(c);note('Image figée. Trace le repère.')};
+let stream=null;function stopLive(){if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}}
+$('#vclose').onclick=()=>{stopLive();vid.pause();$('#vidwrap').style.display='none'};
+$('#live').onclick=async()=>{
+  try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false});vid.removeAttribute('src');vid.srcObject=stream;vid.controls=false;await vid.play();$('#vidwrap').style.display='block';note('Cadre bien en face, puis « Utiliser cette image ».')}
+  catch(err){note('Caméra bloquée ici. Utilise « Prendre une photo », ou ouvre la page depuis GitHub Pages.')}
+};
+addEventListener('resize',fit);new ResizeObserver(fit).observe(fig);
+
+/* ---- Mode AR live (WebXR + ARCore) ---- */
+const mul=(M,v)=>[0,1,2,3].map(i=>M[i]*v[0]+M[4+i]*v[1]+M[8+i]*v[2]+M[12+i]*v[3]);
+$('#ar').onclick=async()=>{
+  if(NATIVE){try{await UP.openExternal({url:(window.APP&&APP.pages||'')+'#ar'});note('L\'AR s\'ouvre dans Chrome (la vue intégrée de l\'app ne gère pas l\'AR).')}catch(e){note('Impossible d\'ouvrir Chrome : '+e.message)}return}
+  let ok=false;try{ok=!!navigator.xr&&await navigator.xr.isSessionSupported('immersive-ar')}catch(e){}
+  if(!ok)return note('AR non disponible ici. Il faut Chrome Android avec ARCore, sur la page publiée (GitHub Pages), pas dans l\'aperçu.');
+  const ov=$('#arov'),c2=$('#arcv'),g2=c2.getContext('2d');let session;
+  try{session=await navigator.xr.requestSession('immersive-ar',{requiredFeatures:['hit-test','local'],optionalFeatures:['dom-overlay'],domOverlay:{root:ov}})}
+  catch(e){return note('Impossible de lancer l\'AR : '+e.message)}
+  ov.hidden=false;
+  const glc=document.createElement('canvas'),gl=glc.getContext('webgl',{xrCompatible:true});
+  session.updateRenderState({baseLayer:new XRWebGLLayer(session,gl)});
+  const space=await session.requestReferenceSpace('local'),viewer=await session.requestReferenceSpace('viewer');
+  const hts=await session.requestHitTestSource({space:viewer});
+  let hit=null;const pts=[];
+  ov.querySelectorAll('button').forEach(b=>b.addEventListener('beforexrselect',e=>e.preventDefault()));
+  $('#arUndo').onclick=()=>pts.pop();$('#arQuit').onclick=()=>session.end();
+  session.addEventListener('select',()=>{if(hit)pts.push(hit)});
+  session.addEventListener('end',()=>{ov.hidden=true});
+  const d3=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2])*100;
+  session.requestAnimationFrame(function f(t,frame){
+    session.requestAnimationFrame(f);const L=session.renderState.baseLayer;
+    gl.bindFramebuffer(gl.FRAMEBUFFER,L.framebuffer);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);
+    const pose=frame.getViewerPose(space);if(!pose)return;
+    const r=frame.getHitTestResults(hts);hit=r.length?(p=>[p.x,p.y,p.z])(r[0].getPose(space).transform.position):null;
+    const v=pose.views[0],P=v.projectionMatrix,V=v.transform.inverse.matrix,dp=devicePixelRatio,W=innerWidth,H=innerHeight;
+    if(c2.width!==W*dp){c2.width=W*dp;c2.height=H*dp}g2.setTransform(dp,0,0,dp,0,0);g2.clearRect(0,0,W,H);
+    const pr=q=>{const c=mul(P,mul(V,[q[0],q[1],q[2],1]));return c[3]<=0?null:[(c[0]/c[3]+1)/2*W,(1-c[1]/c[3])/2*H]};
+    const segs=[];for(let i=0;i+1<pts.length;i+=2)segs.push([pts[i],pts[i+1]]);
+    if(pts.length%2&&hit)segs.push([pts[pts.length-1],hit]);
+    g2.lineCap='round';g2.font='700 22px "Barlow Condensed",sans-serif';g2.textAlign='center';
+    for(const[a,b]of segs){const A=pr(a),B=pr(b);if(!A||!B)continue;
+      g2.strokeStyle='#13a9b8';g2.lineWidth=5;g2.beginPath();g2.moveTo(...A);g2.lineTo(...B);g2.stroke();
+      const lab=fmt(d3(a,b)),mx=(A[0]+B[0])/2,my=(A[1]+B[1])/2,tw=g2.measureText(lab).width+16;
+      g2.fillStyle='#13a9b8';g2.beginPath();g2.roundRect(mx-tw/2,my-40,tw,30,8);g2.fill();g2.fillStyle='#fff';g2.fillText(lab,mx,my-18)}
+    for(const q of pts){const Q=pr(q);if(Q){g2.fillStyle='#ffc928';g2.beginPath();g2.arc(Q[0],Q[1],8,0,7);g2.fill()}}
+    if(hit){const Q=pr(hit);if(Q){g2.strokeStyle='#fff';g2.lineWidth=3;g2.beginPath();g2.arc(Q[0],Q[1],18,0,7);g2.stroke();g2.beginPath();g2.arc(Q[0],Q[1],3,0,7);g2.stroke()}}
+    $('#artip').textContent=hit?(pts.length%2?'Touche pour poser le 2e point':'Touche pour poser un point'):'Bouge doucement le téléphone pour détecter une surface…';
+  });
+};
+
+/* ---- Mise à jour intégrée (APK depuis GitHub Releases) ---- */
+const upM=$('#upModal'),upMsg=$('#upMsg'),upGo=$('#upGo');let latest=null,busy=false,downloaded=false;
+const cur=()=>+(window.APP&&APP.version)||0;
+async function check(silent){
+  if(!silent){upM.hidden=false;upMsg.textContent='Recherche d\'une nouvelle version…';upGo.hidden=true}
+  $('#upVer').textContent='Version installée : '+cur();
+  try{
+    const r=await fetch(`https://api.github.com/repos/${APP.repo}/releases/latest`,{cache:'no-store'});
+    if(!r.ok)throw new Error('GitHub a répondu '+r.status);
+    const j=await r.json(),v=parseInt(String(j.tag_name).replace(/\D/g,''))||0,a=(j.assets||[]).find(x=>x.name.endsWith('.apk'));
+    latest={v,url:a&&a.browser_download_url,size:a&&a.size};
+    const isNew=v>cur()&&latest.url;$('#upBtn').classList.toggle('new',!!isNew);
+    if(silent)return;
+    if(isNew){upMsg.textContent=`Version ${v} disponible${latest.size?' ('+(latest.size/1048576).toFixed(1).replace('.',',')+' Mo)':''}.`;upGo.hidden=false;upGo.textContent=downloaded?'Installer':'Télécharger et installer'}
+    else upMsg.textContent='Ton app est à jour ✓';
+  }catch(e){if(!silent)upMsg.textContent='Vérification impossible : '+e.message+'. Vérifie ta connexion.'}
+}
+upGo.onclick=async()=>{
+  if(busy||!latest)return;busy=true;upGo.disabled=true;
+  try{
+    if(!downloaded){
+      $('#upBarBox').hidden=false;$('#upPct').hidden=false;upMsg.textContent='Téléchargement…';
+      const h=await UP.addListener('progress',p=>{
+        const t=p.total>0?p.total:latest.size||0,pc=t?Math.min(100,p.done/t*100):0;
+        $('#upBar').style.width=pc+'%';$('#upP').textContent=Math.round(pc)+' %';
+        $('#upMb').textContent=(p.done/1048576).toFixed(1).replace('.',',')+(t?' / '+(t/1048576).toFixed(1).replace('.',','):'')+' Mo';
+      });
+      await UP.download({url:latest.url});h.remove();downloaded=true;
+      $('#upBar').style.width='100%';$('#upP').textContent='100 %';
+    }
+    upMsg.textContent='Ouverture de l\'installation…';
+    const res=await UP.install();
+    if(res&&res.needPermission){upMsg.textContent='Autorise « Installer des applis inconnues » pour Fāito, reviens ici, puis appuie sur Installer.';upGo.textContent='Installer'}
+    else upMsg.textContent='Confirme l\'installation dans la fenêtre Android.';
+  }catch(e){upMsg.textContent='Échec : '+e.message;downloaded=false}
+  busy=false;upGo.disabled=false;
+};
+$('#upClose').onclick=()=>{if(!busy)upM.hidden=true};
+$('#upBtn').onclick=()=>check(false);
+if(NATIVE&&window.APP&&APP.repo){$('#upBtn').hidden=false;check(true)}
+
+/* Démo au chargement : porte = repère, table mesurée */
+img=sample();ref={a:{x:415,y:150},b:{x:415,y:760}};lines=[{a:{x:620,y:465},b:{x:1020,y:465}},{a:{x:1040,y:480},b:{x:1040,y:760}}];mode='mes';
+fit();
+}
+</script>
+</body>
+</html>

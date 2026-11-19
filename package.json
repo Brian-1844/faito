@@ -1,0 +1,14 @@
+{
+  "name": "faito",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Fāito — mesurer des distances sur une photo, une vidéo ou en AR",
+  "dependencies": {
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/cli": "^7.0.0",
+    "@capacitor/core": "^7.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5"
+  }
+}
