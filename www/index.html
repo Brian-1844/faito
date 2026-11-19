@@ -62,6 +62,30 @@ small{color:var(--mut)}
 .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--lag),#5fd6e0);transition:width .15s}
 #upPct{font:700 20px "Barlow Condensed";display:flex;justify-content:space-between}
 #upVer{color:var(--mut);font-size:14px}
+.wbox{background:var(--card);border-radius:14px;padding:14px;margin:16px 0;border-left:6px solid #e9643a}
+.wbox h2{font:700 22px "Barlow Condensed";margin:0 0 2px}
+.wbox label{font-weight:600;display:block;margin:10px 0 4px}
+.wbox select,.wbox input{font:600 16px Barlow,sans-serif;min-height:44px;padding:0 10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.wbox input[readonly]{background:var(--card);color:var(--lag)}
+.wdim{display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:8px;align-items:end}
+.wres{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;margin:14px 0 4px}
+.wres b{font:700 clamp(34px,9vw,48px)/1 "Barlow Condensed";color:#e9643a;white-space:nowrap}
+.wres span{color:var(--mut);white-space:nowrap}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.tbtns{display:flex;gap:8px;flex:none}
+.motif{display:block;width:100%;height:22px;margin:2px 0 12px;color:var(--lag)}
+#hello{position:fixed;inset:0;z-index:30;background:#0b1f24;color:#e9f4f5;display:flex;flex-direction:column;overflow:auto}#hello[hidden]{display:none}
+#hello .hb{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:24px 20px;max-width:520px;margin:0 auto;width:100%}
+#hello svg.ill{width:min(220px,60vw);height:auto;margin-bottom:18px}
+#hello h2{font:700 clamp(30px,8vw,42px)/1.05 "Barlow Condensed",sans-serif;margin:0 0 10px;text-wrap:balance}
+#hello p{color:#b9d3d8;margin:0 0 6px;font-size:17px}
+#hello .dots{display:flex;gap:8px;justify-content:center;margin:18px 0}
+#hello .dots i{width:10px;height:10px;border-radius:50%;background:#24505c}#hello .dots i.on{background:#ffc928;width:26px;border-radius:99px}
+#hello .hnav{display:flex;gap:10px;justify-content:center;width:100%}
+#hello .hnav button{flex:1;max-width:200px;background:#12303a;color:#fff;border-color:#24505c}
+#hello .hnav button.pri{background:#13a9b8;border-color:#13a9b8}
+#hello label{font-size:14px;color:#9fbcc3;display:flex;gap:8px;align-items:center;justify-content:center;margin-top:14px;min-height:44px}
+#hello .band2{color:#13a9b8;height:28px;width:100%;flex:none}
+@media(prefers-reduced-motion:no-preference){#hello .hb{animation:hin .35s ease}@keyframes hin{from{opacity:0;transform:translateY(12px)}}}
 @media(prefers-reduced-motion:no-preference){.dot{transition:background .2s}}
 </style>
 </head>
@@ -69,10 +93,13 @@ small{color:var(--mut)}
 <main class="band">
   <div class="top">
     <h1>Fāito <span>· mesurer sur une image</span></h1>
-    <button id="upBtn" hidden aria-label="Mise à jour"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 3v12M6 10l6 6 6-6M4 20h16"/></svg>MAJ<span class="badge"></span></button>
+    <div class="tbtns"><button id="helpBtn" aria-label="Tutoriel">?</button>
+    <button id="upBtn" hidden aria-label="Mise à jour"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 3v12M6 10l6 6 6-6M4 20h16"/></svg>MAJ<span class="badge"></span></button></div>
   </div>
+<svg class="motif" viewBox="0 0 400 22" preserveAspectRatio="none" aria-hidden="true"><defs><pattern id="nm" width="24" height="22" patternUnits="userSpaceOnUse"><path d="M0 0h24L12 11z" fill="currentColor"/><path d="M0 16q6-6 12 0t12 0" fill="none" stroke="#ffc928" stroke-width="2.2"/></pattern></defs><rect width="400" height="22" fill="url(#nm)"/></svg>
   <p class="sub">Trace un repère sur un objet de taille connue, puis mesure le reste.</p>
 
+  <div class="row" id="views" role="tablist"><button data-v="face" class="on">Vue de face</button><button data-v="side">Vue de côté</button></div>
   <div class="fig" id="fig"><canvas id="cv" aria-label="Image à mesurer"></canvas></div>
 
   <div class="step" id="step"><span class="dot" id="dot">1</span><span id="steptxt"></span></div>
@@ -93,6 +120,21 @@ small{color:var(--mut)}
   </div>
 
   <ul id="list"></ul>
+
+  <section class="wbox" id="wbox">
+    <h2>Poids estimé</h2>
+    <p class="sub" style="margin:0">Choisis la forme et la matière. Mesure l'objet de face (longueur, hauteur) puis de côté (profondeur), ou saisis une dimension à la main.</p>
+    <div class="row" id="wShape"></div>
+    <button id="wAuto" class="pri" style="width:100%">Remplir depuis les 2 vues</button>
+    <div id="wDims"></div>
+    <label for="wMat">Matière</label>
+    <select id="wMat" style="width:100%"></select>
+    <div id="wCustom" hidden><label for="wDen">Densité de la matière (kg/m³)</label><input id="wDen" type="number" inputmode="decimal" min="1" value="1000"></div>
+    <label for="wFill">Remplissage (%)</label>
+    <input id="wFill" type="number" inputmode="numeric" min="1" max="100" value="100" style="width:110px"> <small>100 = plein. Baisse pour un objet creux (tuyau, caisse vide…).</small>
+    <div class="wres"><b id="wKg">—</b><span id="wVol"></span></div>
+    <small>Estimation : une petite erreur sur chaque dimension se multiplie, compte environ ±30 %.</small>
+  </section>
 
   <h2 style="font:700 22px 'Barlow Condensed';margin:20px 0 4px">Source</h2>
   <div class="row">
@@ -116,7 +158,7 @@ small{color:var(--mut)}
       <li>Le mode <b>AR live</b> mesure en 3D sans repère (Chrome Android avec ARCore). Il ne marche pas dans l'aperçu Claude : publie la page sur GitHub Pages pour l'utiliser.</li>
     </ul>
   </details>
-  <p><small>Image d'exemple dessinée : la porte (204 cm) sert de repère.</small></p>
+  <p><small>Images d'exemple dessinées (face et côté) : la porte (204 cm) sert de repère.</small></p>
 </main>
 
 <div id="upModal" hidden role="dialog" aria-modal="true" aria-labelledby="upTitle">
@@ -127,6 +169,16 @@ small{color:var(--mut)}
     <div class="bar" id="upBarBox" hidden><i id="upBar"></i></div>
     <div id="upPct" hidden><span id="upP">0 %</span><span id="upMb"></span></div>
     <div class="row"><button id="upGo" class="pri" hidden>Télécharger et installer</button><button id="upClose">Fermer</button></div>
+  </div>
+</div>
+
+<div id="hello" role="dialog" aria-modal="true" aria-labelledby="hTitle" hidden>
+  <svg class="band2" viewBox="0 0 400 28" preserveAspectRatio="none" aria-hidden="true"><defs><pattern id="nm2" width="28" height="28" patternUnits="userSpaceOnUse"><path d="M0 0h28L14 14z" fill="currentColor"/><path d="M0 22q7-7 14 0t14 0" fill="none" stroke="#ffc928" stroke-width="2.5"/></pattern></defs><rect width="400" height="28" fill="url(#nm2)"/></svg>
+  <div class="hb" id="hBody"></div>
+  <div style="padding:0 20px 24px;max-width:520px;margin:0 auto;width:100%">
+    <div class="dots" id="hDots"></div>
+    <div class="hnav"><button id="hPrev">Retour</button><button id="hNext" class="pri">Suivant</button></div>
+    <label><input type="checkbox" id="hSkip"> Ne plus afficher au démarrage</label>
   </div>
 </div>
 
@@ -144,6 +196,22 @@ const CAP=window.Capacitor,NATIVE=!!(CAP&&CAP.isNativePlatform&&CAP.isNativePlat
 const UP=NATIVE?((CAP.Plugins&&CAP.Plugins.ApkUpdater)||(CAP.registerPlugin&&CAP.registerPlugin('ApkUpdater'))):null;
 const PRE=[['Porte',204],['A4 long',29.7],['A4 court',21],['Carte bancaire',8.56],['Marche',17],['1 m',100]];
 let img=null,ref=null,lines=[],mode='ref',drag=null,s=1,dpr=1,loupe=null;
+let cur='face';const VW={face:null,side:null};
+function saveV(){VW[cur]={img,ref,lines,mode,rl:$('#reflen').value}}
+function loadV(k){const o=VW[k];cur=k;if(o){img=o.img;ref=o.ref;lines=o.lines;mode=o.mode;$('#reflen').value=o.rl}else{img=blank();ref=null;lines=[];mode='ref'}
+  document.querySelectorAll('#views button').forEach(b=>b.classList.toggle('on',b.dataset.v===k));fit()}
+function blank(){const c=document.createElement('canvas');c.width=1200;c.height=900;const g=c.getContext('2d');g.fillStyle='#12303a';g.fillRect(0,0,1200,900);g.fillStyle='#9fbcc3';g.textAlign='center';g.font='600 48px sans-serif';g.fillText('Ajoute la photo de côté',600,430);g.font='34px sans-serif';g.fillText('même objet, vu de profil',600,495);return c}
+function cmAt(src){const[k,j]=src.split(':'),i=+j;if(k===cur)return lines[i]?cmOf(lines[i]):null;const o=VW[k];if(!o||!o.ref||!o.lines[i])return null;const rp=len(o.ref);return rp>0?len(o.lines[i])*(+o.rl||0)/rp:null}
+function allM(){const out=[];for(const k of['face','side']){const n=k===cur?lines.length:(VW[k]?VW[k].lines.length:0);for(let i=0;i<n;i++)out.push(k+':'+i)}return out}
+function sampleSide(){
+  const c=document.createElement('canvas');c.width=1200;c.height=900;const g=c.getContext('2d');
+  let gr=g.createLinearGradient(0,0,0,760);gr.addColorStop(0,'#e3d3bb');gr.addColorStop(1,'#cfbb9c');g.fillStyle=gr;g.fillRect(0,0,1200,760);
+  g.fillStyle='#8a6a4a';g.fillRect(0,760,1200,140);
+  g.fillStyle='#5b3a24';g.fillRect(150,150,250,610);g.fillStyle='#6f4a30';g.fillRect(170,170,210,590);g.fillStyle='#e0b44a';g.beginPath();g.arc(350,470,10,0,7);g.fill();
+  g.fillStyle='#2f6f78';g.fillRect(640,480,209,30);g.fillStyle='#255a61';g.fillRect(652,510,24,250);g.fillRect(813,510,24,250);
+  g.fillStyle='#e9643a';g.fillRect(700,420,50,60);
+  return c;
+}
 const fmt=cm=>cm>=100?(cm/100).toFixed(2).replace('.',',')+' m':cm.toFixed(1).replace('.',',')+' cm';
 const len=l=>Math.hypot(l.b.x-l.a.x,l.b.y-l.a.y);
 const cmOf=l=>ref&&len(ref)>0?len(l)*(+$('#reflen').value||0)/len(ref):null;
@@ -197,6 +265,7 @@ function ui(){
   $('#steptxt').textContent=mode==='ref'?'Glisse le doigt le long d\'un objet de taille connue':'Glisse le doigt pour mesurer. Touche un point pour l\'ajuster.';
   $('#refinfo').textContent=ref?'':'aucun repère tracé';
   $('#list').innerHTML=lines.map((l,i)=>{const c=cmOf(l);return `<li><span>Mesure ${i+1}</span><b>${c==null?'—':fmt(c)}</b></li>`}).join('');
+  wCalc();
 }
 const pt=e=>{const r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)/s,y:(e.clientY-r.top)/s}};
 cv.addEventListener('pointerdown',e=>{
@@ -278,16 +347,16 @@ $('#ar').onclick=async()=>{
 
 /* ---- Mise à jour intégrée (APK depuis GitHub Releases) ---- */
 const upM=$('#upModal'),upMsg=$('#upMsg'),upGo=$('#upGo');let latest=null,busy=false,downloaded=false;
-const cur=()=>+(window.APP&&APP.version)||0;
+const appV=()=>+(window.APP&&APP.version)||0;
 async function check(silent){
   if(!silent){upM.hidden=false;upMsg.textContent='Recherche d\'une nouvelle version…';upGo.hidden=true}
-  $('#upVer').textContent='Version installée : '+cur();
+  $('#upVer').textContent='Version installée : '+appV();
   try{
     const r=await fetch(`https://api.github.com/repos/${APP.repo}/releases/latest`,{cache:'no-store'});
     if(!r.ok)throw new Error('GitHub a répondu '+r.status);
     const j=await r.json(),v=parseInt(String(j.tag_name).replace(/\D/g,''))||0,a=(j.assets||[]).find(x=>x.name.endsWith('.apk'));
     latest={v,url:a&&a.browser_download_url,size:a&&a.size};
-    const isNew=v>cur()&&latest.url;$('#upBtn').classList.toggle('new',!!isNew);
+    const isNew=v>appV()&&latest.url;$('#upBtn').classList.toggle('new',!!isNew);
     if(silent)return;
     if(isNew){upMsg.textContent=`Version ${v} disponible${latest.size?' ('+(latest.size/1048576).toFixed(1).replace('.',',')+' Mo)':''}.`;upGo.hidden=false;upGo.textContent=downloaded?'Installer':'Télécharger et installer'}
     else upMsg.textContent='Ton app est à jour ✓';
@@ -317,8 +386,70 @@ $('#upClose').onclick=()=>{if(!busy)upM.hidden=true};
 $('#upBtn').onclick=()=>check(false);
 if(NATIVE&&window.APP&&APP.repo){$('#upBtn').hidden=false;check(true)}
 
+/* ---- Poids estimé : volume × densité, dimensions prises sur les 2 vues ---- */
+const SH={pave:{n:'Pavé / boîte',d:['Longueur (face)','Profondeur (côté)','Hauteur (face)'],auto:['face:0','side:0','face:1']},cyl:{n:'Cylindre / tuyau',d:['Diamètre','Hauteur'],auto:['face:0','face:1']},sph:{n:'Boule',d:['Diamètre'],auto:['face:0']}};
+const MAT=[['Bois léger (pin, sapin)',500],['Bois dur (chêne)',750],['Contreplaqué',600],['Eau',1000],['Glace',917],['Béton',2400],['Pierre volcanique (basalte)',2900],['Granite',2700],['Sable sec',1600],['Terre',1500],['Verre',2500],['Acier',7850],['Aluminium',2700],['Cuivre',8960],['Plastique PVC',1400],['Plastique polyéthylène',950],['Caoutchouc',1100],['Polystyrène (frigolite)',25],['Autre (je connais la densité)',0]];
+const Wt={shape:'pave',dims:[{src:'face:0',v:0},{src:'side:0',v:0},{src:null,v:3}],mat:1,key:''};
+const mName=sv=>(sv.startsWith('face')?'Face':'Côté')+' · Mesure '+(+sv.split(':')[1]+1);
+$('#wShape').innerHTML=Object.entries(SH).map(([k,o])=>`<button class="chip" data-s="${k}">${o.n}</button>`).join('');
+$('#wMat').innerHTML=MAT.map(([n,d],i)=>`<option value="${i}">${n}${d?' · '+d.toLocaleString('fr-FR')+' kg/m³':''}</option>`).join('');
+$('#wMat').value=Wt.mat;
+function wDims(){
+  const all=allM();Wt.key=Wt.shape+'|'+all.join();
+  $('#wDims').innerHTML=SH[Wt.shape].d.map((n,i)=>{const d=Wt.dims[i]||(Wt.dims[i]={src:null,v:0});
+    const miss=d.src&&!all.includes(d.src)?`<option value="${d.src}" selected>${mName(d.src)} (à tracer)</option>`:'';
+    return `<label for="wv${i}">${n} (cm)</label><div class="wdim"><select data-i="${i}" aria-label="Source de ${n}"><option value="">Saisir à la main</option>${all.map(sv=>`<option value="${sv}"${d.src===sv?' selected':''}>${mName(sv)}</option>`).join('')}${miss}</select><input id="wv${i}" data-i="${i}" type="number" inputmode="decimal" min="0" step="0.1" value="${d.v||''}"></div>`}).join('');
+}
+function wFmt(kg){if(kg<1)return Math.round(kg*1000)+' g';if(kg>=1000)return (kg/1000).toFixed(2).replace('.',',')+' t';return kg.toFixed(kg<10?2:1).replace('.',',')+' kg'}
+function wCalc(){
+  if(Wt.key!==Wt.shape+'|'+allM().join())wDims();
+  document.querySelectorAll('#wShape button').forEach(b=>b.classList.toggle('on',b.dataset.s===Wt.shape));
+  const n=SH[Wt.shape].d.length,v=[];let ok=true,miss='';
+  for(let i=0;i<n;i++){const d=Wt.dims[i],inp=$('#wv'+i);
+    if(d.src){const c=cmAt(d.src);inp.readOnly=true;inp.value=c==null?'':c.toFixed(1);d.v=c||0;if(c==null&&!miss)miss=mName(d.src)}else inp.readOnly=false;
+    if(!(d.v>0))ok=false;v.push(d.v)}
+  const m=MAT[Wt.mat],den=m[1]||+$('#wDen').value||0,fill=Math.min(100,Math.max(1,+$('#wFill').value||100))/100;
+  $('#wCustom').hidden=!!m[1];
+  if(!ok||!den){$('#wKg').textContent='—';$('#wVol').textContent=miss?'Trace '+miss:'Complète les dimensions';return}
+  const r=x=>x/2,vol=Wt.shape==='pave'?v[0]*v[1]*v[2]:Wt.shape==='cyl'?Math.PI*r(v[0])**2*v[1]:4/3*Math.PI*r(v[0])**3;
+  const kg=vol/1e6*den*fill,L=vol/1000;
+  $('#wKg').textContent='≈ '+wFmt(kg);
+  $('#wVol').textContent='Volume '+(L<1?Math.round(vol)+' cm³':L.toFixed(L<10?2:1).replace('.',',')+' L')+(fill<1?' · rempli à '+Math.round(fill*100)+' %':'');
+}
+$('#wShape').onclick=e=>{const b=e.target.closest('button');if(!b)return;Wt.shape=b.dataset.s;Wt.key='';wCalc()};
+$('#wAuto').onclick=()=>{SH[Wt.shape].auto.forEach((sv,i)=>Wt.dims[i]={src:sv,v:0});Wt.key='';wCalc();if(!(VW.side||cur==='side'))note('Ajoute maintenant la vue de côté pour la profondeur.')};
+$('#wDims').addEventListener('change',e=>{if(e.target.tagName==='SELECT'){Wt.dims[+e.target.dataset.i].src=e.target.value||null;wCalc()}});
+$('#wDims').addEventListener('input',e=>{if(e.target.tagName==='INPUT'){Wt.dims[+e.target.dataset.i].v=+e.target.value;wCalc()}});
+$('#wMat').onchange=e=>{Wt.mat=+e.target.value;wCalc()};$('#wDen').oninput=wCalc;$('#wFill').oninput=wCalc;
+document.querySelectorAll('#views button').forEach(b=>b.onclick=()=>{if(b.dataset.v===cur)return;saveV();loadV(b.dataset.v);note(cur==='side'?'Vue de côté : photographie le même objet de profil, avec un repère au même plan.':'Vue de face.')});
+
+/* ---- Écran d'accueil et tutoriel ---- */
+const SUN=`<g fill="#ffc928">${[...Array(12)].map((_,i)=>`<path d="M100 18l7 22h-14z" transform="rotate(${i*30} 100 100)"/>`).join('')}</g><circle cx="100" cy="100" r="44" fill="#ffc928"/><circle cx="100" cy="100" r="30" fill="#0b1f24"/><g fill="#13a9b8">${[...Array(8)].map((_,i)=>`<path d="M100 74l6 12h-12z" transform="rotate(${i*45} 100 100)"/>`).join('')}</g><circle cx="100" cy="100" r="9" fill="#ffc928"/>`;
+const TURTLE=`<ellipse cx="100" cy="104" rx="46" ry="54" fill="#13a9b8"/><path d="M100 56v96M60 90h80M60 120h80" stroke="#0b1f24" stroke-width="5"/><path d="M76 70l24 18 24-18M76 140l24-18 24 18" fill="none" stroke="#0b1f24" stroke-width="5"/><circle cx="100" cy="40" r="15" fill="#13a9b8"/><path d="M58 70l-26-18 8 26zM142 70l26-18-8 26zM62 142l-24 18 26 2zM138 142l24 18-26 2z" fill="#13a9b8"/>`;
+const STEPS=[
+ {t:'Ia ora na !',p:['Bienvenue dans <b>Fāito</b>.','Mesure des distances et estime le poids d\'un objet, à partir d\'une photo, d\'une vidéo ou de la caméra.'],s:SUN},
+ {t:'1. Pose le repère jaune',p:['Glisse le doigt le long d\'un objet dont tu connais la taille : porte, feuille A4, carte bancaire…','Indique ensuite sa taille réelle, ou touche un préréglage.'],s:`<rect x="20" y="80" width="160" height="40" rx="8" fill="#ffc928"/>${[...Array(15)].map((_,i)=>`<rect x="${30+i*10}" y="80" width="3" height="${i%2?10:18}" fill="#0b1f24"/>`).join('')}<path d="M40 150h120" stroke="#ffc928" stroke-width="6" stroke-linecap="round"/><circle cx="40" cy="150" r="9" fill="#ffc928"/><circle cx="160" cy="150" r="9" fill="#ffc928"/>`},
+ {t:'2. Mesure en bleu',p:['Glisse le doigt d\'un bout à l\'autre de ce que tu veux mesurer. La loupe t\'aide à viser juste.','Touche un point pour l\'ajuster. Le repère et l\'objet doivent être à la même distance.'],s:`<path d="M30 150L150 70" stroke="#13a9b8" stroke-width="7" stroke-linecap="round"/><circle cx="30" cy="150" r="10" fill="#13a9b8"/><circle cx="150" cy="70" r="10" fill="#13a9b8"/><circle cx="150" cy="70" r="34" fill="none" stroke="#fff" stroke-width="5"/><path d="M174 94l16 16" stroke="#fff" stroke-width="8" stroke-linecap="round"/><rect x="56" y="104" width="62" height="26" rx="7" fill="#13a9b8"/><text x="87" y="123" fill="#fff" font-size="16" font-weight="700" text-anchor="middle" font-family="sans-serif">45 cm</text>`},
+ {t:'3. Estime le poids',p:['Mesure l\'objet <b>de face</b>, puis ouvre <b>Vue de côté</b> pour sa profondeur.','Choisis la forme et la matière, et Fāito calcule le poids : volume × densité.'],s:TURTLE},
+ {t:'Mauruuru !',p:['Tu peux revoir ce tutoriel à tout moment avec le bouton <b>?</b> en haut.'],s:SUN}
+];
+let hs=0;const hello=$('#hello');
+function hShow(){const st=STEPS[hs];
+  $('#hBody').innerHTML=`<svg class="ill" viewBox="0 0 200 200" aria-hidden="true">${st.s}</svg><h2 id="hTitle">${st.t}</h2>${st.p.map(x=>`<p>${x}</p>`).join('')}`;
+  $('#hDots').innerHTML=STEPS.map((_,i)=>`<i class="${i===hs?'on':''}"></i>`).join('');
+  $('#hPrev').style.visibility=hs?'visible':'hidden';$('#hNext').textContent=hs===STEPS.length-1?'Commencer':'Suivant';}
+function hOpen(){hs=0;hello.hidden=false;hShow()}
+function hClose(){hello.hidden=true;try{localStorage.setItem('faito-hello',$('#hSkip').checked?'off':'on')}catch(e){}}
+$('#hNext').onclick=()=>{if(hs<STEPS.length-1){hs++;hShow()}else hClose()};
+$('#hPrev').onclick=()=>{if(hs){hs--;hShow()}};
+$('#helpBtn').onclick=hOpen;
+let hx=null;hello.addEventListener('touchstart',e=>hx=e.touches[0].clientX,{passive:true});
+hello.addEventListener('touchend',e=>{if(hx==null)return;const dx=e.changedTouches[0].clientX-hx;hx=null;if(dx<-50)$('#hNext').click();else if(dx>50)$('#hPrev').click()});
+{let off=false;try{off=localStorage.getItem('faito-hello')==='off'}catch(e){};$('#hSkip').checked=off;if(!off)hOpen()}
+
 /* Démo au chargement : porte = repère, table mesurée */
 img=sample();ref={a:{x:415,y:150},b:{x:415,y:760}};lines=[{a:{x:620,y:465},b:{x:1020,y:465}},{a:{x:1040,y:480},b:{x:1040,y:760}}];mode='mes';
+VW.side={img:sampleSide(),ref:{a:{x:415,y:150},b:{x:415,y:760}},lines:[{a:{x:640,y:465},b:{x:849,y:465}}],mode:'mes',rl:'204'};
 fit();
 }
 </script>
