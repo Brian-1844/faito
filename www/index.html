@@ -185,6 +185,30 @@ button.pri{background:#0a7480;border-color:#0a7480}html.dalto button.pri{backgro
 .chip{min-height:44px}
 h1{cursor:pointer}
 .offtool{display:none!important}
+.calc{border-left-color:#0072B2}
+.cdisp{background:var(--bg);border-radius:14px;padding:12px 14px;margin:10px 0;text-align:right;border:1px solid var(--line)}
+#cExpr{min-height:24px;font-size:18px;color:var(--mut);overflow-wrap:anywhere}
+#cRes{font:700 clamp(40px,12vw,58px)/1.1 "Barlow Condensed",sans-serif;overflow-wrap:anywhere}
+.ckeys{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.ckeys button{min-height:60px;justify-content:center;font:600 24px Barlow,sans-serif;border-radius:14px;padding:0}
+.ckeys .op{background:light-dark(#dbe9f6,#173a52);color:light-dark(#0b4f7c,#9fd0f5)}
+.ckeys .eq{background:#0a7480;border-color:#0a7480;color:#fff}html.dalto .ckeys .eq{background:#0072B2}
+.ckeys .fn{color:light-dark(#9a3412,#ffb38a)}
+#cHist{list-style:none;padding:0;margin:8px 0;display:grid;gap:4px}
+#cHist button{width:100%;justify-content:space-between;min-height:40px;font-size:15px}
+.pbox{border-left-color:#CC79A7}
+.ptop{display:flex;gap:14px;align-items:center;margin:10px 0}
+#pSw{flex:none;width:96px;height:96px;border-radius:18px;border:3px solid var(--line)}
+#pName{font:700 clamp(26px,7vw,36px)/1.05 "Barlow Condensed",sans-serif}
+#pCodes{font-size:14px;color:var(--mut);overflow-wrap:anywhere}
+#pSV{display:block;width:100%;height:190px;border-radius:14px;touch-action:none;cursor:crosshair;margin:8px 0}
+#pHue{width:100%;height:44px;-webkit-appearance:none;appearance:none;background:linear-gradient(90deg,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00);border-radius:99px;outline-offset:3px}
+#pHue::-webkit-slider-thumb{-webkit-appearance:none;width:30px;height:30px;border-radius:50%;background:#fff;border:3px solid #10232a}
+#pHue::-moz-range-thumb{width:26px;height:26px;border-radius:50%;background:#fff;border:3px solid #10232a}
+.psim{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:8px 0}
+.psim div{border-radius:10px;height:54px;border:1px solid var(--line)}.psim span{display:block;font-size:12px;text-align:center;color:var(--mut);margin-top:3px}
+#pGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:6px;margin-top:8px}
+#pGrid button{min-height:44px;padding:0;border-radius:10px;border:2px solid #0002}#pGrid button.on{outline:3px solid var(--ink);outline-offset:2px}
 @media(prefers-reduced-motion:no-preference){.dot{transition:background .2s}}
 </style>
 </head>
@@ -274,6 +298,19 @@ h1{cursor:pointer}
     <div id="wBanner" role="alert"></div>
     <small>La couleur perçue dépend de l'éclairage : en lumière jaune ou dans l'ombre, le nom peut changer. Préfère la lumière du jour.</small>
   </section>
+  <section class="sbox pbox" id="pickbox">
+    <h2>Nuancier</h2>
+    <p class="sub" style="margin:0">Choisis une couleur précise : dans le carré, sur la barre des teintes, dans la palette de 94 couleurs nommées, ou avec son code.</p>
+    <div class="ptop"><div id="pSw" aria-hidden="true"></div><div><div id="pName" aria-live="polite">—</div><div id="pCodes"></div></div></div>
+    <canvas id="pSV" aria-label="Carré saturation et luminosité"></canvas>
+    <input id="pHue" type="range" min="0" max="359" value="200" aria-label="Teinte">
+    <div class="row" style="align-items:center"><label for="pHex" style="font-weight:600">Code</label><input id="pHex" class="wsel" style="width:130px;font-family:ui-monospace,monospace" value="#13A9B8" maxlength="7" aria-label="Code hexadécimal"><button id="pCopy">Copier</button><button id="pFind" class="pri">🔍 Chercher avec la caméra</button></div>
+    <h3 style="font:700 18px 'Barlow Condensed';margin:12px 0 2px">Comment la voient les daltoniens</h3>
+    <div class="psim"><div><div id="ps0"></div><span>Vision habituelle</span></div><div><div id="ps1"></div><span>Deutéranopie</span></div><div><div id="ps2"></div><span>Protanopie</span></div><div><div id="ps3"></div><span>Tritanopie</span></div></div>
+    <h3 style="font:700 18px 'Barlow Condensed';margin:12px 0 2px">Palette nommée</h3>
+    <input id="pSearch" class="wsel" style="width:100%" placeholder="Rechercher : bleu, rose, vert…" aria-label="Rechercher une couleur">
+    <div id="pGrid" role="list"></div>
+  </section>
   <section class="sbox fbox" id="fbox">
     <h2>Assistant feux (en voiture)</h2>
     <p class="sub" style="margin:0">Téléphone fixé au tableau de bord, caméra vers la route : l'app repère les feux rouges et orange, et les voitures devant qui freinent, puis l'annonce à voix haute.</p>
@@ -346,6 +383,20 @@ h1{cursor:pointer}
       <div class="nref"><b>&lt; 1 lux</b><span>nuit, pleine lune</span><b>50 à 150</b><span>salon, éclairage d'ambiance</span><b>300 à 500</b><span>bureau, bon éclairage pour lire</span><b>1 000 à 10 000</b><span>ciel couvert</span><b>30 000 à 100 000</b><span>plein soleil</span></div>
     </div>
     <small>Valeurs approximatives : le micro et le capteur d'un téléphone ne remplacent pas un appareil de mesure professionnel (compte ±5 dB et ±20 % environ, plus sans calibration). La mesure avec la caméra est relative (de 0 à 100) : elle sert à comparer deux sources, pas à donner des lux.</small>
+  </section>
+  <section class="sbox calc" id="calcbox">
+    <h2>Calculatrice</h2>
+    <div class="cdisp"><div id="cExpr"></div><div id="cRes" aria-live="polite">0</div></div>
+    <div class="ckeys" id="cKeys">
+      <button class="fn" data-k="C" aria-label="Tout effacer">C</button><button class="fn" data-k="back" aria-label="Effacer le dernier chiffre">⌫</button><button class="op" data-k="%" aria-label="Pour cent">%</button><button class="op" data-k="÷" aria-label="Diviser">÷</button>
+      <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button><button class="op" data-k="×" aria-label="Multiplier">×</button>
+      <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button><button class="op" data-k="−" aria-label="Moins">−</button>
+      <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button><button class="op" data-k="+" aria-label="Plus">+</button>
+      <button data-k="neg" aria-label="Changer le signe">±</button><button data-k="0">0</button><button data-k="," aria-label="Virgule">,</button><button class="eq" data-k="=" aria-label="Égal">=</button>
+    </div>
+    <div class="row"><button id="cCopy">Copier le résultat</button><button id="cMes">📏 Insérer une mesure</button></div>
+    <div id="cMesList" class="row" hidden></div>
+    <ul id="cHist"></ul>
   </section>
   <section class="sbox mbox" id="mbox">
     <h2>Morse : messages par vibrations</h2>
@@ -894,8 +945,8 @@ function cSample(src,x,y,w,h){const k=Math.max(3,Math.round(Math.min(w,h)/60));c
   const d=cg.getImageData(0,0,k,k).data;let r=0,g=0,b=0,n=0;for(let i=0;i<d.length;i+=4){r+=d[i];g+=d[i+1];b+=d[i+2];n++}return[r/n|0,g/n|0,b/n|0]}
 function cCross(x,y){const o=$('#cOv'),W=o.clientWidth,H=o.clientHeight,dp=devicePixelRatio||1;o.width=W*dp;o.height=H*dp;const g=o.getContext('2d');g.setTransform(dp,0,0,dp,0,0);
   for(const[c,w]of[['#000',5],['#fff',2.5]]){g.strokeStyle=c;g.lineWidth=w;g.beginPath();g.arc(x*W,y*H,16,0,7);g.moveTo(x*W-26,y*H);g.lineTo(x*W-10,y*H);g.moveTo(x*W+10,y*H);g.lineTo(x*W+26,y*H);g.moveTo(x*W,y*H-26);g.lineTo(x*W,y*H-10);g.moveTo(x*W,y*H+10);g.lineTo(x*W,y*H+26);g.stroke()}}
-function cLoop(){if(!CZ.run)return;const v=$('#cVid');if(v.videoWidth){cShow(...cSample(v,v.videoWidth/2,v.videoHeight/2,v.videoWidth,v.videoHeight));cCross(.5,.5);if(WZ.on)wRun(v,v.videoWidth,v.videoHeight)}setTimeout(()=>requestAnimationFrame(cLoop),WZ.on?Math.max(0,1000/(+$('#wFreq').value||5)-15):120)}
-function cStop(){CZ.run=false;if(WZ.on){WZ.mask=null;WZ.hits=0;$('#wBanner').className=''}CZ.stream&&CZ.stream.getTracks().forEach(t=>t.stop());CZ.stream=null;$('#cCam').textContent='Démarrer la caméra'}
+function cLoop(){if(!CZ.run)return;const v=$('#cVid');if(v.videoWidth){cShow(...cSample(v,v.videoWidth/2,v.videoHeight/2,v.videoWidth,v.videoHeight));cCross(.5,.5);if(WZ.on)wRun(v,v.videoWidth,v.videoHeight);else if(CZ.target)pFindRun(v,v.videoWidth,v.videoHeight)}setTimeout(()=>requestAnimationFrame(cLoop),WZ.on?Math.max(0,1000/(+$('#wFreq').value||5)-15):120)}
+function cStop(){CZ.run=false;CZ.target=null;if(WZ.on){WZ.mask=null;WZ.hits=0;$('#wBanner').className=''}CZ.stream&&CZ.stream.getTracks().forEach(t=>t.stop());CZ.stream=null;$('#cCam').textContent='Démarrer la caméra'}
 $('#cCam').onclick=async()=>{
   if(CZ.run){cStop();return}
   try{CZ.stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false});const v=$('#cVid');v.hidden=false;$('#cImg').hidden=true;v.srcObject=CZ.stream;await v.play();
@@ -1214,6 +1265,84 @@ $('#nCamL').onclick=()=>NZ.cam?nCamStop():(NZ.lux&&nLuxStop(),nCamStart());
 $('#nLxSave').onclick=()=>{if(NZ.lcur==null){$('#nLxCmp').textContent='Lance d\'abord une mesure.';return}NZ.saved={v:NZ.lcur,unit:NZ.cam?'rel':'lux'};$('#nLxCmp').textContent='Mesure mémorisée : '+Math.round(NZ.lcur)+'. Vise une autre source pour comparer.'};
 function nStopAll(){if(NZ.snd)nSndStop();if(NZ.lux)nLuxStop();if(NZ.cam)nCamStop()}
 
+/* ---- Nuancier : choisir une couleur précise ---- */
+const PAL=[["Rouge", "#E3242B"], ["Rouge vif", "#FF1A1A"], ["Carmin", "#960018"], ["Bordeaux", "#6D071A"], ["Cerise", "#DE3163"], ["Framboise", "#C72C48"], ["Grenat", "#6E0B14"], ["Rouge brique", "#B22222"], ["Vermillon", "#E34234"], ["Corail", "#FF7F50"], ["Saumon", "#FA8072"], ["Rose hibiscus", "#D1345B"], ["Rose", "#FF66A3"], ["Rose pâle", "#F8C8DC"], ["Rose poudré", "#E8B4B8"], ["Fuchsia", "#FF00A8"], ["Magenta", "#D400D4"], ["Prune", "#6C2E5A"], ["Violet", "#7F00FF"], ["Mauve", "#B57EDC"], ["Lavande", "#B4A7E5"], ["Lilas", "#C8A2C8"], ["Améthyste", "#9966CC"], ["Aubergine", "#3D0C3E"], ["Indigo", "#3F00A0"], ["Bleu nuit", "#191970"], ["Bleu marine", "#0B1F4B"], ["Bleu roi", "#2B4BD8"], ["Bleu", "#1E5BD6"], ["Bleu cobalt", "#0047AB"], ["Bleu océan", "#0F5E9C"], ["Bleu lagon", "#13A9B8"], ["Bleu ciel", "#77B5FE"], ["Bleu clair", "#ADD8F2"], ["Azur", "#007FFF"], ["Bleu acier", "#4682B4"], ["Bleu ardoise", "#5A6E8C"], ["Bleu pétrole", "#1D4E5E"], ["Cyan", "#00D7E8"], ["Turquoise", "#30D5C8"], ["Sarcelle", "#008080"], ["Vert d'eau", "#B0F2B6"], ["Menthe", "#3EB489"], ["Émeraude", "#009B77"], ["Vert", "#1E9E3A"], ["Vert vif", "#2BD52B"], ["Vert pomme", "#7FD12E"], ["Citron vert", "#BFE33B"], ["Vert sapin", "#0B4F2C"], ["Vert forêt", "#1F5E20"], ["Vert bouteille", "#0B5D3B"], ["Vert olive", "#708238"], ["Kaki", "#94812B"], ["Vert de gris", "#7A9E7E"], ["Sauge", "#9CAF88"], ["Jaune", "#FFD500"], ["Jaune citron", "#F5F03A"], ["Jaune pâle", "#FFF3A3"], ["Jaune moutarde", "#D9A400"], ["Or", "#D4AF37"], ["Ambre", "#FFB000"], ["Ocre", "#C77B30"], ["Orange", "#FF8A00"], ["Mandarine", "#FF7A1A"], ["Coucher de soleil", "#FF5E3A"], ["Abricot", "#F5A26B"], ["Pêche", "#FFCBA4"], ["Mangue", "#FFB347"], ["Caramel", "#AF6E35"], ["Cuivre", "#B87333"], ["Rouille", "#A0411D"], ["Terre de Sienne", "#8E402A"], ["Chocolat", "#5B3A1E"], ["Marron", "#7B3F00"], ["Brun", "#5C4033"], ["Noisette", "#9C6B30"], ["Café", "#4B3621"], ["Taupe", "#8B7D6B"], ["Beige", "#E3CBA5"], ["Sable", "#E2C78F"], ["Crème", "#FFF5D6"], ["Ivoire", "#FFFFF0"], ["Blanc tiare", "#FBFAF2"], ["Blanc", "#FFFFFF"], ["Blanc cassé", "#F4F1EA"], ["Gris perle", "#D7D7D2"], ["Argent", "#C0C0C0"], ["Gris clair", "#BDBDBD"], ["Gris", "#8A8A8A"], ["Gris souris", "#6E6E6E"], ["Gris ardoise", "#5A5E63"], ["Anthracite", "#303438"], ["Noir perle de Tahiti", "#2E3440"], ["Noir", "#0A0A0A"]];
+const PZ={h:200,s:.9,v:.72};
+const hsv2rgb=(h,s,v)=>{const f=n=>{const k=(n+h/60)%6;return Math.round(255*(v-v*s*Math.max(0,Math.min(k,4-k,1))))};return[f(5),f(3),f(1)]};
+const rgb2hsv=(r,g,b)=>{r/=255;g/=255;b/=255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn;let h=0;if(d)h=mx===r?((g-b)/d)%6:mx===g?(b-r)/d+2:(r-g)/d+4;return[(h*60+360)%360,mx?d/mx:0,mx]};
+const hex2rgb=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));const rgb2hex=c=>'#'+c.map(v=>v.toString(16).padStart(2,'0')).join('').toUpperCase();
+const PLAB=PAL.map(([n,h])=>{const c=hex2rgb(h);return{n,h,l:lab(LIN[c[0]],LIN[c[1]],LIN[c[2]])}});
+function nearest(c){const l=lab(LIN[c[0]],LIN[c[1]],LIN[c[2]]);let b=null,bd=1e9;for(const p of PLAB){const d=Math.hypot(l[0]-p.l[0],l[1]-p.l[1],l[2]-p.l[2]);if(d<bd){bd=d;b=p}}return{p:b,d:bd}}
+function simHex(c,k){const M=SIM[k],r=LIN[c[0]],g=LIN[c[1]],b=LIN[c[2]],o=[M[0]*r+M[1]*g+M[2]*b,M[3]*r+M[4]*g+M[5]*b,M[6]*r+M[7]*g+M[8]*b].map(x=>{x=Math.min(1,Math.max(0,x));return Math.round(255*(x<=0.0031308?12.92*x:1.055*x**(1/2.4)-0.055))});return rgb2hex(o)}
+function pDrawSV(){const c=$('#pSV'),W=c.clientWidth,H=c.clientHeight,dp=devicePixelRatio||1;if(!W)return;c.width=W*dp;c.height=H*dp;const g=c.getContext('2d');g.setTransform(dp,0,0,dp,0,0);
+  g.fillStyle=`hsl(${PZ.h},100%,50%)`;g.fillRect(0,0,W,H);let gr=g.createLinearGradient(0,0,W,0);gr.addColorStop(0,'#fff');gr.addColorStop(1,'#fff0');g.fillStyle=gr;g.fillRect(0,0,W,H);
+  gr=g.createLinearGradient(0,0,0,H);gr.addColorStop(0,'#0000');gr.addColorStop(1,'#000');g.fillStyle=gr;g.fillRect(0,0,W,H);
+  const x=PZ.s*W,y=(1-PZ.v)*H;g.lineWidth=3;g.strokeStyle='#000';g.beginPath();g.arc(x,y,11,0,7);g.stroke();g.lineWidth=2;g.strokeStyle='#fff';g.beginPath();g.arc(x,y,11,0,7);g.stroke()}
+let pSayT=0;
+function pUpd(fromHex){const c=hsv2rgb(PZ.h,PZ.s,PZ.v),hex=rgb2hex(c),nr=nearest(c),[hh,ss,vv]=rgb2hsv(...c);
+  $('#pSw').style.background=hex;$('#pName').textContent=nr.d<6?nr.p.n:(nr.p.n+' (proche)');
+  const R=c[0]/255,G=c[1]/255,B=c[2]/255,mx=Math.max(R,G,B),mn=Math.min(R,G,B),L=(mx+mn)/2,S=mx===mn?0:(mx-mn)/(1-Math.abs(2*L-1));
+  $('#pCodes').textContent=`${hex} · RVB ${c.join(', ')} · TSL ${Math.round(hh)}°, ${Math.round(S*100)} %, ${Math.round(L*100)} % · catégorie : ${cName(...c)}`;
+  if(!fromHex)$('#pHex').value=hex;$('#pHue').value=Math.round(PZ.h);
+  $('#ps0').style.background=hex;['deut','prot','trit'].forEach((k,i)=>$('#ps'+(i+1)).style.background=simHex(c,k));
+  document.querySelectorAll('#pGrid button').forEach(b=>b.classList.toggle('on',b.dataset.h===hex));
+  pDrawSV();clearTimeout(pSayT);pSayT=setTimeout(()=>say(nr.p.n),700);PZ.rgb=c}
+function pSet(hex){const c=hex2rgb(hex);[PZ.h,PZ.s,PZ.v]=rgb2hsv(...c);if(PZ.s===0)PZ.h=+$('#pHue').value;pUpd()}
+function pGrid(){const q=$('#pSearch').value.trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+  $('#pGrid').innerHTML=PAL.filter(([n])=>!q||n.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').includes(q)).map(([n,h])=>`<button role="listitem" data-h="${h}" style="background:${h}" title="${n}" aria-label="${n}"></button>`).join('')||'<small>Aucune couleur trouvée.</small>'}
+const pSV=$('#pSV');let pDrag=false;
+const pPick=e=>{const r=pSV.getBoundingClientRect();PZ.s=Math.min(1,Math.max(0,(e.clientX-r.left)/r.width));PZ.v=Math.min(1,Math.max(0,1-(e.clientY-r.top)/r.height));pUpd()};
+pSV.addEventListener('pointerdown',e=>{pDrag=true;pSV.setPointerCapture(e.pointerId);pPick(e)});pSV.addEventListener('pointermove',e=>{if(pDrag)pPick(e)});pSV.addEventListener('pointerup',()=>pDrag=false);
+$('#pHue').oninput=e=>{PZ.h=+e.target.value;pUpd()};
+$('#pHex').oninput=e=>{let v=e.target.value.trim();if(!v.startsWith('#'))v='#'+v;if(/^#[0-9a-fA-F]{6}$/.test(v)){const c=hex2rgb(v);[PZ.h,PZ.s,PZ.v]=rgb2hsv(...c);pUpd(true)}};
+$('#pGrid').onclick=e=>{const b=e.target.closest('[data-h]');if(b)pSet(b.dataset.h)};
+$('#pSearch').oninput=pGrid;
+$('#pCopy').onclick=async()=>{try{await navigator.clipboard.writeText($('#pHex').value);$('#pCopy').textContent='Copié ✓';setTimeout(()=>$('#pCopy').textContent='Copier',1500)}catch(e){$('#pCopy').textContent='Copie impossible ici'}};
+/* Chercher la couleur choisie avec la caméra (onglet Couleur) */
+function pFindRun(src,w,h){if(!CZ.target)return;const W=96,H=Math.max(1,Math.round(h/w*W));wcv.width=W;wcv.height=H;wg.drawImage(src,0,0,W,H);const d=wg.getImageData(0,0,W,H).data,T=CZ.target,mask=new Uint8Array(W*H);let n=0;
+  for(let i=0,j=0;i<d.length;i+=4,j++){const o=lab(LIN[d[i]],LIN[d[i+1]],LIN[d[i+2]]);if(Math.hypot(0.5*(o[0]-T.l[0]),o[1]-T.l[1],o[2]-T.l[2])<16){mask[j]=1;n++}}
+  WZ.mask=mask;WZ.W=W;WZ.H=H;wDraw();const pc=Math.round(n/(W*H)*100);$('#cHex').textContent=`Recherche « ${T.n} » : ${pc?pc+' % de l\'image (zone hachurée)':'non trouvée'}`;
+  const now=Date.now();if(pc>=1&&now-(CZ.fT||0)>4000){CZ.fT=now;say(T.n+' trouvé');navigator.vibrate&&navigator.vibrate(120)}}
+$('#pFind').onclick=()=>{const c=PZ.rgb||hsv2rgb(PZ.h,PZ.s,PZ.v);CZ.target={l:lab(LIN[c[0]],LIN[c[1]],LIN[c[2]]),n:nearest(c).p.n};goTool('couleur');if(!CZ.run)$('#cCam').click();say('Recherche de '+CZ.target.n)};
+pGrid();requestAnimationFrame(()=>pSet('#13A9B8'));new ResizeObserver(pDrawSV).observe(pSV);
+
+/* ---- Calculatrice simple (sans eval) ---- */
+const CA={t:[],cur:'',res:null,hist:[]};
+try{CA.hist=JSON.parse(localStorage.getItem('faito-calc')||'[]')}catch(e){}
+const caNum=s=>parseFloat(String(s).replace(',','.'));
+const caFmt=v=>{if(!isFinite(v))return'Erreur';const r=+v.toPrecision(12);return Math.abs(r)>=1e15||(Math.abs(r)<1e-9&&r!==0)?r.toExponential(6).replace('.',','):String(r).replace('.',',')};
+function caEval(tok){const v=[],o=[],P={'+':1,'−':1,'×':2,'÷':2};const ap=()=>{const b=v.pop(),a=v.pop(),op=o.pop();v.push(op==='+'?a+b:op==='−'?a-b:op==='×'?a*b:b===0?NaN:a/b)};
+  for(const x of tok){if(typeof x==='number')v.push(x);else{while(o.length&&P[o[o.length-1]]>=P[x])ap();o.push(x)}}while(o.length)ap();return v.length?v[0]:0}
+function caTokens(){const tk=[...CA.t];if(CA.cur!==''&&CA.cur!=='-')tk.push(caNum(CA.cur));else if(tk.length&&typeof tk[tk.length-1]!=='number')tk.pop();return tk}
+function caShow(){$('#cExpr').textContent=CA.t.map(x=>typeof x==='number'?caFmt(x):' '+x+' ').join('')+(CA.cur||'');
+  const tk=caTokens();$('#cRes').textContent=CA.res!=null?caFmt(CA.res):tk.length?caFmt(caEval(tk)):'0'}
+function caHist(){$('#cHist').innerHTML=CA.hist.slice(0,5).map((h,i)=>`<li><button data-h="${i}"><span>${h.e}</span><b>= ${h.r}</b></button></li>`).join('')}
+function caKey(k){
+  if(CA.res!=null&&!'+−×÷'.includes(k)&&k!=='%'){if(k!=='='){CA.t=[];CA.cur='';}}
+  if(CA.res!=null&&'+−×÷'.includes(k)){CA.t=[];CA.cur=String(CA.res).replace('.',',');}
+  CA.res=null;
+  if(/^[0-9]$/.test(k)){if(CA.cur==='0')CA.cur='';if(CA.cur.replace(/[-,]/g,'').length<15)CA.cur+=k}
+  else if(k===','){if(!CA.cur.includes(','))CA.cur=(CA.cur===''||CA.cur==='-'?CA.cur+'0':CA.cur)+','}
+  else if(k==='neg'){CA.cur=CA.cur.startsWith('-')?CA.cur.slice(1):'-'+(CA.cur||'0')}
+  else if(k==='%'){if(CA.cur!==''){const n=caNum(CA.cur)/100,op=CA.t[CA.t.length-1];CA.cur=caFmt((op==='+'||op==='−')?caEval(CA.t.slice(0,-1))*n:n)}}
+  else if(k==='back'){if(CA.cur)CA.cur=CA.cur.slice(0,-1);else if(CA.t.length){const x=CA.t.pop();if(typeof x!=='number'&&CA.t.length)CA.cur=caFmt(CA.t.pop())}}
+  else if(k==='C'){CA.t=[];CA.cur=''}
+  else if('+−×÷'.includes(k)){if(CA.cur!==''&&CA.cur!=='-'){CA.t.push(caNum(CA.cur));CA.cur=''}if(!CA.t.length)CA.t.push(0);if(typeof CA.t[CA.t.length-1]!=='number')CA.t[CA.t.length-1]=k;else CA.t.push(k)}
+  else if(k==='='){const tk=caTokens();if(!tk.length)return;const e=$('#cExpr').textContent.trim(),r=caEval(tk);CA.res=r;CA.t=[];CA.cur='';
+    if(isFinite(r)){CA.hist.unshift({e,r:caFmt(r)});CA.hist=CA.hist.slice(0,20);try{localStorage.setItem('faito-calc',JSON.stringify(CA.hist))}catch(er){}caHist()}
+    $('#cExpr').textContent=e+' =';$('#cRes').textContent=caFmt(r);say(isFinite(r)?'Égal '+caFmt(r).replace('-','moins '):'Erreur, division par zéro');return}
+  caShow();
+}
+$('#cKeys').onclick=e=>{const b=e.target.closest('button');if(b){caKey(b.dataset.k);if(A11Y.blind&&/^[0-9]$/.test(b.dataset.k))say(b.dataset.k)}};
+$('#cHist').onclick=e=>{const b=e.target.closest('[data-h]');if(!b)return;const h=CA.hist[+b.dataset.h];CA.res=null;CA.t=[];CA.cur=h.r;caShow()};
+$('#cCopy').onclick=async()=>{const v=$('#cRes').textContent;try{await navigator.clipboard.writeText(v);$('#cCopy').textContent='Copié ✓';setTimeout(()=>$('#cCopy').textContent='Copier le résultat',1500)}catch(e){$('#cCopy').textContent='Copie impossible ici'}};
+$('#cMes').onclick=()=>{const L=$('#cMesList');const vals=allM().map(sv=>({n:mName(sv),v:cmAt(sv)})).filter(x=>x.v!=null);
+  L.innerHTML=vals.length?vals.map((x,i)=>`<button class="chip" data-v="${x.v.toFixed(1)}">${x.n} · ${x.v.toFixed(1).replace('.',',')} cm</button>`).join(''):'<small>Aucune mesure : trace d\'abord des mesures dans Mesurer › Photo.</small>';L.hidden=!L.hidden};
+$('#cMesList').onclick=e=>{const b=e.target.closest('[data-v]');if(!b)return;if(CA.res!=null){CA.t=[];CA.res=null}CA.cur=b.dataset.v.replace('.',',');caShow()};
+addEventListener('keydown',e=>{if($('#calcbox').classList.contains('offtool')||/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))return;
+  const m={'*':'×','/':'÷','-':'−','+':'+','.':',',',':',','Enter':'=','=':'=','Backspace':'back','Escape':'C','%':'%'};const k=/^[0-9]$/.test(e.key)?e.key:m[e.key];if(k){e.preventDefault();caKey(k)}});
+caHist();caShow();
+
 /* ---- Morse + mode sourd : vibrations, flashs, lampe torche ---- */
 const MO={A:'.-',B:'-...',C:'-.-.',D:'-..',E:'.',F:'..-.',G:'--.',H:'....',I:'..',J:'.---',K:'-.-',L:'.-..',M:'--',N:'-.',O:'---',P:'.--.',Q:'--.-',R:'.-.',S:'...',T:'-',U:'..-',V:'...-',W:'.--',X:'-..-',Y:'-.--',Z:'--..',0:'-----',1:'.----',2:'..---',3:'...--',4:'....-',5:'.....',6:'-....',7:'--...',8:'---..',9:'----.','.':'.-.-.-',',':'--..--','?':'..--..','!':'-.-.--',"'":'.----.','-':'-....-','/':'-..-.','@':'.--.-.'};
 const MR=Object.fromEntries(Object.entries(MO).map(([k,v])=>[v,k]));
@@ -1331,15 +1460,16 @@ fit();
 /* ---- Navigation : accueil, 5 familles, sous-onglets ---- */
 {
 const ICON={};document.querySelectorAll('#nav button').forEach(b=>ICON[b.dataset.t]=b.querySelector('svg').outerHTML);
+ICON.calc='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="2.5" width="14" height="19" rx="2.5"/><rect x="8" y="5.5" width="8" height="4" rx="1"/><path d="M8.5 13h.01M12 13h.01M15.5 13h.01M8.5 16.5h.01M12 16.5h.01M15.5 16.5h.01" stroke-width="2.6"/></svg>';
 ICON.home='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9h-6v-6H9v6H3z"/></svg>';
 const FAM=[
  {id:'mesurer',n:'Mesurer',ic:'mesure',tools:[['photo','Photo','mesure','distances sur photo, vidéo, caméra'],['poids','Poids','poids','volume × matière'],['laser','Laser','laser','pointeur laser + caméra'],['vitesse','Vitesse','vitesse','km/h d\'un objet qui passe']]},
  {id:'son',n:'Son',ic:'sonar',tools:[['sonar','Sonar','sonar','distance jusqu\'au mur'],['radar','Radar','radar','plan dans le noir, alerte'],['db','Décibels','niveaux','niveau sonore dB(A)']]},
- {id:'voir',n:'Voir',ic:'couleur',tools:[['couleur','Couleur','couleur','nom de la couleur'],['veille','Veille daltonien','couleur','alerte couleurs difficiles'],['feux','Feux (voiture)','couleur','rouge, orange, freinage'],['lumiere','Lumière','niveaux','luxmètre']]},
- {id:'compter',n:'Compter',ic:'compter',tools:[['compter','Compter','compter','objets qui se ressemblent']]},
+ {id:'voir',n:'Voir',ic:'couleur',tools:[['couleur','Couleur','couleur','nom de la couleur'],['nuancier','Nuancier','couleur','choisir une couleur précise'],['veille','Veille daltonien','couleur','alerte couleurs difficiles'],['feux','Feux (voiture)','couleur','rouge, orange, freinage'],['lumiere','Lumière','niveaux','luxmètre']]},
+ {id:'compter',n:'Compter',ic:'compter',tools:[['compter','Compter','compter','objets qui se ressemblent'],['calc','Calculatrice','calc','calculs simples, avec tes mesures']]},
  {id:'morse',n:'Morse',ic:'morse',tools:[['morse','Morse','morse','vibrations, flashs, caméra']]}];
 const TOOL={};FAM.forEach(f=>f.tools.forEach(([id,n,ic,d])=>TOOL[id]={id,n,ic,d,fam:f.id}));
-const main=document.querySelector('main'),SEC={wbox:'poids',lbox:'laser',vbox:'vitesse',sbox:'sonar',rbox:'radar',nbox:'db lumiere',cbox:'couleur veille',fbox:'feux',kbox:'compter',mbox:'morse'};
+const main=document.querySelector('main'),SEC={wbox:'poids',lbox:'laser',vbox:'vitesse',sbox:'sonar',rbox:'radar',nbox:'db lumiere',cbox:'couleur veille',fbox:'feux',pickbox:'nuancier',kbox:'compter',mbox:'morse',calcbox:'calc'};
 /* sous-navigation et accueil */
 const sub=document.createElement('div');sub.id='subnav';sub.setAttribute('aria-label','Outils de la famille');
 const home=document.createElement('section');home.id='home';main.querySelector('.motif').after(sub,home);
