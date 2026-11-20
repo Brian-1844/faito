@@ -136,6 +136,35 @@ public class ApkUpdaterPlugin extends Plugin {
         call.resolve();
     }
 
+    private android.hardware.SensorManager sm;
+    private android.hardware.SensorEventListener sl;
+
+    /** Capteur de lumière ambiante (lux). */
+    @PluginMethod
+    public void lightStart(PluginCall call) {
+        sm = (android.hardware.SensorManager) getContext().getSystemService(Context.SENSOR_SERVICE);
+        android.hardware.Sensor s = sm == null ? null : sm.getDefaultSensor(android.hardware.Sensor.TYPE_LIGHT);
+        if (s == null) { call.reject("Pas de capteur de lumière"); return; }
+        if (sl != null) sm.unregisterListener(sl);
+        sl = new android.hardware.SensorEventListener() {
+            @Override public void onSensorChanged(android.hardware.SensorEvent e) {
+                JSObject o = new JSObject();
+                o.put("lux", e.values[0]);
+                notifyListeners("light", o);
+            }
+            @Override public void onAccuracyChanged(android.hardware.Sensor a, int b) {}
+        };
+        sm.registerListener(sl, s, android.hardware.SensorManager.SENSOR_DELAY_UI);
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void lightStop(PluginCall call) {
+        if (sm != null && sl != null) sm.unregisterListener(sl);
+        sl = null;
+        call.resolve();
+    }
+
     /** Ouvre une adresse dans Chrome (utile pour le mode AR / WebXR). */
     @PluginMethod
     public void openExternal(PluginCall call) {

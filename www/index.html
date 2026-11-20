@@ -66,10 +66,10 @@ small{color:var(--mut)}
 .wbox h2{font:700 22px "Barlow Condensed";margin:0 0 2px}
 .wbox label{font-weight:600;display:block;margin:10px 0 4px}
 .wbox select,.wbox input{font:600 16px Barlow,sans-serif;min-height:44px;padding:0 10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
-.wbox input[readonly]{background:var(--card);color:var(--lag)}
+.wbox input[readonly]{background:var(--card);color:light-dark(#0a7480,#5fd6e0)}
 .wdim{display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:8px;align-items:end}
 .wres{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;margin:14px 0 4px}
-.wres b{font:700 clamp(34px,9vw,48px)/1 "Barlow Condensed";color:#e9643a;white-space:nowrap}
+.wres b{font:700 clamp(34px,9vw,48px)/1 "Barlow Condensed";color:light-dark(#c2410c,#ff9a6b);white-space:nowrap}
 .wres span{color:var(--mut);white-space:nowrap}
 .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.tbtns{display:flex;gap:8px;flex:none}
 .motif{display:block;width:100%;height:22px;margin:2px 0 12px;color:var(--lag)}
@@ -161,6 +161,30 @@ html.dalto{--tape:#E69F00;--lag:#0072B2}
 #vN{font:700 clamp(44px,12vw,64px)/1 "Barlow Condensed";white-space:nowrap;color:#0072B2}
 #vHist{list-style:none;padding:0;margin:6px 0;display:grid;gap:4px}#vHist li{background:var(--bg);border-radius:8px;padding:6px 10px;display:flex;justify-content:space-between}
 .vin{font:600 16px Barlow,sans-serif;min-height:44px;width:100px;padding:0 10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.nbox{border-left-color:#E69F00}
+.ncard{background:var(--bg);border-radius:14px;padding:12px 14px;margin:10px 0}
+.ncard h3{font:700 20px "Barlow Condensed";margin:0 0 4px}
+.nbig{font:700 clamp(46px,13vw,68px)/1 "Barlow Condensed";white-space:nowrap}
+.nscale{position:relative;height:16px;border-radius:99px;background:linear-gradient(90deg,#0072B2,#009E73 40%,#F0E442 62%,#E69F00 75%,#D55E00);margin:14px 0 26px}
+.nscale i{position:absolute;top:-5px;width:4px;height:26px;background:var(--ink);border-radius:2px;transform:translateX(-2px);transition:left .1s}
+.nscale span{position:absolute;top:20px;font-size:11px;color:var(--mut);transform:translateX(-50%);white-space:nowrap}
+#nSpark{display:block;width:100%;height:70px}
+.nref{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;font-size:14px;margin-top:6px}.nref b{text-align:right;white-space:nowrap}
+#subnav{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 0 12px;padding:2px}#subnav::-webkit-scrollbar{display:none}
+#subnav button{flex:none;min-height:44px;border-radius:99px;font-size:15px;padding:0 16px}
+#subnav button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+#home h3{font:700 20px "Barlow Condensed",sans-serif;margin:18px 0 8px;display:flex;align-items:center;gap:8px}
+#home h3 svg{width:22px;height:22px;color:var(--lag)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.tile{position:relative;flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:4px;min-height:86px;padding:12px 14px;text-align:left;border-radius:14px;background:var(--card)}
+.tile svg{width:26px;height:26px;color:var(--lag)}.tile b{font-size:16px}.tile small{font-size:13px;color:var(--mut);line-height:1.3}
+.tile .star{position:absolute;top:4px;right:4px;width:40px;height:40px;display:grid;place-items:center;font-size:20px;color:var(--mut);border-radius:10px}
+.tile .star.on{color:#E69F00}
+#nav button{flex:1 0 56px;font-size:11px}
+button.pri{background:#0a7480;border-color:#0a7480}html.dalto button.pri{background:#0072B2;border-color:#0072B2}
+.chip{min-height:44px}
+h1{cursor:pointer}
+.offtool{display:none!important}
 @media(prefers-reduced-motion:no-preference){.dot{transition:background .2s}}
 </style>
 </head>
@@ -174,7 +198,7 @@ html.dalto{--tape:#E69F00;--lag:#0072B2}
 <svg class="motif" viewBox="0 0 400 22" preserveAspectRatio="none" aria-hidden="true"><defs><pattern id="nm" width="24" height="22" patternUnits="userSpaceOnUse"><path d="M0 0h24L12 11z" fill="currentColor"/><path d="M0 16q6-6 12 0t12 0" fill="none" stroke="#ffc928" stroke-width="2.2"/></pattern></defs><rect width="400" height="22" fill="url(#nm)"/></svg>
   <p class="sub">Trace un repère sur un objet de taille connue, puis mesure le reste.</p>
 
-  <div class="row" id="views" role="tablist"><button data-v="face" class="on">Vue de face</button><button data-v="side">Vue de côté</button></div>
+  <div class="row" id="views"><button data-v="face" class="on">Vue de face</button><button data-v="side">Vue de côté</button></div>
   <div class="fig" id="fig"><canvas id="cv" aria-label="Image à mesurer"></canvas></div>
 
   <div class="step" id="step"><span class="dot" id="dot">1</span><span id="steptxt"></span></div>
@@ -296,6 +320,33 @@ html.dalto{--tape:#E69F00;--lag:#0072B2}
     <ul id="vHist"></ul>
     <small>Deux lignes : mesure au sol la distance entre deux repères (poteaux, marquages…), place une ligne sur chacun, et l'app chronomètre le passage. Suivre l'objet : touche l'objet ; l'échelle vient soit de sa distance, soit d'un objet de référence tracé dans l'image (une voiture fait environ 4,2 m), placé à la même distance que le trajet. Le mouvement doit être de côté par rapport à la caméra (±20 % environ). Pour une vidéo au ralenti, indique le facteur (×4, ×8).</small>
   </section>
+  <section class="sbox nbox" id="nbox">
+    <h2>Lumière et son</h2>
+    <p class="sub" style="margin:0">Mesure le bruit en décibels avec le micro, et la lumière en lux avec le capteur du téléphone ou la caméra.</p>
+    <div class="ncard">
+      <h3>🔊 Niveau sonore</h3>
+      <div class="row"><button id="nSnd" class="pri">Démarrer le sonomètre</button><button id="nSndR">Remettre à zéro</button></div>
+      <div class="sres" style="margin:6px 0"><b class="nbig" id="nDb" aria-live="polite">— dB</b><span id="nDbInfo">dB(A), pondération proche de l'oreille</span></div>
+      <div class="nscale" aria-hidden="true"><i id="nDbM" style="left:0"></i><span style="left:16.7%">30</span><span style="left:41.7%">60</span><span style="left:62.5%">85</span><span style="left:79.2%">100</span><span style="left:95.8%">120</span></div>
+      <canvas id="nSpark" aria-label="Historique du niveau sonore sur 30 secondes"></canvas>
+      <div id="nDbStats" class="sub" style="margin:4px 0">Min — · Moyenne — · Max —</div>
+      <div class="row" style="align-items:center"><label for="nAl" style="font-weight:600">Alerte au-dessus de</label><select id="nAl" class="wsel"><option value="0">Désactivée</option><option value="85">85 dB</option><option value="100">100 dB</option></select></div>
+      <details><summary>Calibrer avec un vrai sonomètre</summary><p class="sub">Place les deux appareils côte à côte devant un bruit stable, puis indique la valeur du sonomètre.</p>
+        <div class="row" style="align-items:center"><input id="nRef" class="vin" type="number" inputmode="decimal" placeholder="ex. 70"> dB <button id="nCal">Calibrer</button><button id="nCal0">Par défaut</button></div><small id="nCalI"></small></details>
+      <div class="nref"><b>30 dB</b><span>chuchotement, chambre calme</span><b>60 dB</b><span>conversation</span><b>85 dB</b><span>circulation dense : risque pour l'audition si l'exposition dure des heures</span><b>100 dB</b><span>moto, discothèque : protège tes oreilles</span><b>120 dB</b><span>seuil de la douleur</span></div>
+    </div>
+    <div class="ncard">
+      <h3>💡 Lumière</h3>
+      <div class="row"><button id="nLux" class="pri">Capteur de lumière (lux)</button><button id="nCamL">Avec la caméra (relatif)</button></div>
+      <div class="sres" style="margin:6px 0"><b class="nbig" id="nLx" aria-live="polite">—</b><span id="nLxInfo">Le capteur est en haut de l'écran, près de la caméra avant : tourne l'écran vers la lumière.</span></div>
+      <video id="nVid" playsinline muted hidden style="width:100%;border-radius:12px;margin:6px 0"></video>
+      <div id="nLxStats" class="sub" style="margin:4px 0"></div>
+      <div class="row"><button id="nLxSave">Mémoriser pour comparer</button></div>
+      <div id="nLxCmp" class="sub"></div>
+      <div class="nref"><b>&lt; 1 lux</b><span>nuit, pleine lune</span><b>50 à 150</b><span>salon, éclairage d'ambiance</span><b>300 à 500</b><span>bureau, bon éclairage pour lire</span><b>1 000 à 10 000</b><span>ciel couvert</span><b>30 000 à 100 000</b><span>plein soleil</span></div>
+    </div>
+    <small>Valeurs approximatives : le micro et le capteur d'un téléphone ne remplacent pas un appareil de mesure professionnel (compte ±5 dB et ±20 % environ, plus sans calibration). La mesure avec la caméra est relative (de 0 à 100) : elle sert à comparer deux sources, pas à donner des lux.</small>
+  </section>
   <section class="sbox mbox" id="mbox">
     <h2>Morse : messages par vibrations</h2>
     <p class="sub" style="margin:0">Écris un message : le téléphone le transmet en vibrations, en flashs d'écran ou avec la lampe torche. Pour les personnes sourdes ou sourdes-aveugles, et pour communiquer en silence.</p>
@@ -364,6 +415,7 @@ html.dalto{--tape:#E69F00;--lag:#0072B2}
   <button data-t="couleur"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a9 9 0 1 0 0 18c1.5 0 2-1 2-2s-1-1.5-1-2.5 1-1.5 2-1.5h2a4 4 0 0 0 4-4c0-4.5-4-8-9-8z"/><circle cx="7.5" cy="11" r="1.3" fill="currentColor"/><circle cx="10" cy="7" r="1.3" fill="currentColor"/><circle cx="15" cy="7.5" r="1.3" fill="currentColor"/></svg>Couleur</button>
   <button data-t="compter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M17.5 14v7M14 17.5h7" stroke-linecap="round"/></svg>Compter</button>
   <button data-t="vitesse"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 17a8 8 0 1 1 16 0"/><path d="M12 17l4.5-5"/><circle cx="12" cy="17" r="1.4" fill="currentColor"/></svg>Vitesse</button>
+  <button data-t="niveaux"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="9" r="3"/><path d="M8 2v2M8 14v2M2 9h2M12.5 9H14M3.8 4.8l1.1 1.1M11.2 4.8l-1.1 1.1"/><path d="M15 21v-4M18 21v-8M21 21v-6"/></svg>Niveaux</button>
   <button data-t="morse"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="4" cy="12" r="1.5" fill="currentColor"/><path d="M9 12h5"/><circle cx="19" cy="12" r="1.5" fill="currentColor"/><path d="M3 6h3M9 6h8M3 18h8M15 18h6" stroke-width="1.6" opacity=".5"/></svg>Morse</button>
 </nav>
 <div id="flash" aria-hidden="true"></div>
@@ -638,7 +690,7 @@ function wCalc(){
   if(!ok||!den){$('#wKg').textContent='—';$('#wVol').textContent=miss?'Trace '+miss:'Complète les dimensions';return}
   const r=x=>x/2,vol=Wt.shape==='pave'?v[0]*v[1]*v[2]:Wt.shape==='cyl'?Math.PI*r(v[0])**2*v[1]:4/3*Math.PI*r(v[0])**3;
   const kg=vol/1e6*den*fill,L=vol/1000;
-  $('#wKg').textContent='≈ '+wFmt(kg);if(!$('#wbox').hidden)sayLater('Poids estimé : '+spkKg(wFmt(kg)));
+  $('#wKg').textContent='≈ '+wFmt(kg);if(!$('#wbox').classList.contains('offtool'))sayLater('Poids estimé : '+spkKg(wFmt(kg)));
   $('#wVol').textContent='Volume '+(L<1?Math.round(vol)+' cm³':L.toFixed(L<10?2:1).replace('.',',')+' L')+(fill<1?' · rempli à '+Math.round(fill*100)+' %':'');
 }
 $('#wShape').onclick=e=>{const b=e.target.closest('button');if(!b)return;Wt.shape=b.dataset.s;Wt.key='';wCalc()};
@@ -657,7 +709,7 @@ const STEPS=[
  {t:'2. Mesure en bleu',p:['Glisse le doigt d\'un bout à l\'autre de ce que tu veux mesurer. La loupe t\'aide à viser juste.','Touche un point pour l\'ajuster. Le repère et l\'objet doivent être à la même distance.'],s:`<path d="M30 150L150 70" stroke="#13a9b8" stroke-width="7" stroke-linecap="round"/><circle cx="30" cy="150" r="10" fill="#13a9b8"/><circle cx="150" cy="70" r="10" fill="#13a9b8"/><circle cx="150" cy="70" r="34" fill="none" stroke="#fff" stroke-width="5"/><path d="M174 94l16 16" stroke="#fff" stroke-width="8" stroke-linecap="round"/><rect x="56" y="104" width="62" height="26" rx="7" fill="#13a9b8"/><text x="87" y="123" fill="#fff" font-size="16" font-weight="700" text-anchor="middle" font-family="sans-serif">45 cm</text>`},
  {t:'3. Estime le poids',p:['Mesure l\'objet <b>de face</b>, puis ouvre <b>Vue de côté</b> pour sa profondeur.','Choisis la forme et la matière, et Fāito calcule le poids : volume × densité.'],s:TURTLE},
  {t:'4. Sonar',p:['Pas de photo ? Appuie sur <b>Bip</b> : le téléphone écoute l\'écho et donne la distance jusqu\'au mur.','Dans le noir, le <b>radar</b> dessine la pièce pendant que tu tournes sur toi-même.'],s:`${[40,70,100].map(r=>`<path d="M${60+r*0.2} ${100-r} A${r} ${r} 0 0 1 ${60+r*0.2} ${100+r}" fill="none" stroke="#8f7aa8" stroke-width="7" stroke-linecap="round" transform="translate(${r*0.6} 0)"/>`).join('')}<rect x="20" y="70" width="34" height="60" rx="8" fill="#13a9b8"/><rect x="170" y="30" width="12" height="140" fill="#ffc928"/>`},
- {t:'Mauruuru !',p:['Le bouton <b>accessibilité</b> en haut active le mode non-voyant (voix), daltonien ou sourd (vibrations).','Le <b>menu en bas</b> range les outils : Mesure, Poids, Sonar, Radar, Laser, Couleur, Compter, Vitesse et Morse.','Tu peux revoir ce tutoriel avec le bouton <b>?</b> en haut.'],s:SUN}
+ {t:'Mauruuru !',p:['Le bouton <b>accessibilité</b> en haut active le mode non-voyant (voix), daltonien ou sourd (vibrations).','Le <b>menu en bas</b> regroupe les outils en 5 familles : Mesurer, Son, Voir, Compter et Morse. L\'<b>Accueil</b> les montre tous, avec tes favoris.','Tu peux revoir ce tutoriel avec le bouton <b>?</b> en haut.'],s:SUN}
 ];
 let hs=0;const hello=$('#hello');
 function hShow(){const st=STEPS[hs];
@@ -985,7 +1037,7 @@ $('#kList').onclick=e=>{const b=e.target.closest('button');if(!b)return;
 $('#kSave').onclick=()=>{if(!KZ.model){$('#kHint').textContent='Entoure d\'abord un exemple.';return}const name=$('#kName').value.trim()||('Objet '+(KM.length+1));
   KZ.model.name=name;const i=KM.findIndex(m=>m.name===name),m={name,L:KZ.model.L,a:KZ.model.a,b:KZ.model.b,tol:KZ.model.tol};if(i>=0)KM[i]=m;else KM.push(m);
   try{localStorage.setItem('faito-models',JSON.stringify(KM))}catch(e){}kList();kTick();say('Type '+name+' enregistré')};
-new ResizeObserver(()=>{if(!$('#kbox').hidden)kDraw()}).observe(kcv);
+new ResizeObserver(()=>{if(!$('#kbox').classList.contains('offtool'))kDraw()}).observe(kcv);
 /* Exemple au démarrage : des oranges sur une table */
 {const c=document.createElement('canvas');c.width=640;c.height=420;const g=c.getContext('2d');g.fillStyle='#2f6f78';g.fillRect(0,0,640,420);g.fillStyle='#285f67';for(let y=0;y<420;y+=40)g.fillRect(0,y,640,3);
  const P=[[90,90],[200,110],[320,80],[450,120],[560,90],[130,240],[270,250],[332,262],[480,230],[580,300],[200,350],[400,350]];
@@ -1108,6 +1160,60 @@ $('#vScale').onchange=()=>{VZ.max=0;vHintUp()};
 $('#vRefBtn').onclick=()=>{if(!VZ.src){vHintUp();return}VZ.refPick=1;VZ.ref=null;vHintUp()};
 vHintUp();
 
+/* ---- Lumière et son : sonomètre dB(A) et luxmètre ---- */
+const NZ={snd:false,ac:null,st:null,an:null,buf:null,fq:null,off:120,lv:-1,hist:[],min:1e9,max:-1e9,eS:0,eN:0,lastSay:0,lastAl:0,lux:false,cam:false,cst:null,lmin:1e9,lmax:0,lcur:null,saved:null,lh:null};
+try{const o=+localStorage.getItem('faito-dboff');if(o)NZ.off=o}catch(e){}
+const aW=f=>{const f2=f*f,ra=12194**2*f2*f2/((f2+20.6**2)*Math.sqrt((f2+107.7**2)*(f2+737.9**2))*(f2+12194**2));return 20*Math.log10(ra)+2};
+async function nSndStart(){
+  try{NZ.st=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
+    NZ.ac=new (window.AudioContext||window.webkitAudioContext)();await NZ.ac.resume();const src=NZ.ac.createMediaStreamSource(NZ.st);NZ.an=NZ.ac.createAnalyser();NZ.an.fftSize=4096;NZ.an.smoothingTimeConstant=0;src.connect(NZ.an);
+    NZ.fq=new Float32Array(NZ.an.frequencyBinCount);NZ.td=new Float32Array(NZ.an.fftSize);const sr=NZ.ac.sampleRate;NZ.aw=Float32Array.from({length:NZ.fq.length},(_,i)=>i?aW(i*sr/NZ.an.fftSize):-200);
+    NZ.snd=true;$('#nSnd').textContent='Arrêter';nSndLoop()}
+  catch(e){$('#nDbInfo').textContent=e.name==='NotAllowedError'||e.name==='SecurityError'?'Micro bloqué ici : utilise l\'APK.':'Erreur : '+e.message}}
+function nSndStop(){NZ.snd=false;NZ.st&&NZ.st.getTracks().forEach(t=>t.stop());try{NZ.ac&&NZ.ac.close()}catch(e){}NZ.ac=null;$('#nSnd').textContent='Démarrer le sonomètre'}
+function nSndLoop(){
+  if(!NZ.snd)return;NZ.an.getFloatFrequencyData(NZ.fq);NZ.an.getFloatTimeDomainData(NZ.td);let pA=0,pZ=0;for(let i=1;i<NZ.fq.length;i++){const v=NZ.fq[i];if(v>-200&&isFinite(v)){pZ+=10**(v/10);pA+=10**((v+NZ.aw[i])/10)}}
+  let ss=0;for(const x of NZ.td)ss+=x*x;const rms=Math.sqrt(ss/NZ.td.length),corr=pZ>0&&pA>0?10*Math.log10(pA/pZ):0;
+  const dbfs=rms>1e-7?20*Math.log10(rms)+3.01+corr:-120,db=Math.max(0,dbfs+NZ.off);NZ.lv=NZ.lv<0?db:0.7*NZ.lv+0.3*db;const L=NZ.lv;
+  NZ.min=Math.min(NZ.min,L);NZ.max=Math.max(NZ.max,L);NZ.eS+=10**(L/10);NZ.eN++;const avg=10*Math.log10(NZ.eS/NZ.eN);
+  NZ.hist.push(L);if(NZ.hist.length>300)NZ.hist.shift();
+  $('#nDb').textContent=Math.round(L)+' dB';$('#nDb').style.color=COL.lv[L>=85?0:L>=70?1:2];$('#nDbM').style.left=Math.min(100,L/120*100)+'%';
+  $('#nDbStats').textContent=`Min ${Math.round(NZ.min)} · Moyenne ${Math.round(avg)} · Max ${Math.round(NZ.max)} dB`;
+  const now=Date.now(),al=+$('#nAl').value;if(al&&L>=al&&now-NZ.lastAl>3000){NZ.lastAl=now;navigator.vibrate&&navigator.vibrate([200,100,200]);flashEdge(0);say(Math.round(L)+' décibels, trop fort',true)}
+  if(A11Y.blind&&now-NZ.lastSay>6000){NZ.lastSay=now;say(Math.round(L)+' décibels')}
+  nSpark();setTimeout(nSndLoop,100)}
+function nSpark(){const c=$('#nSpark'),W=c.clientWidth,H=c.clientHeight,dp=devicePixelRatio||1;if(!W)return;c.width=W*dp;c.height=H*dp;const g=c.getContext('2d');g.setTransform(dp,0,0,dp,0,0);
+  g.strokeStyle='#8884';g.setLineDash([3,3]);for(const v of[60,85]){const y=H-v/120*H;g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke()}g.setLineDash([]);
+  g.strokeStyle=COL.mes;g.lineWidth=2;g.beginPath();NZ.hist.forEach((v,i)=>{const x=W-(NZ.hist.length-1-i)*W/300,y=H-Math.min(120,v)/120*H;i?g.lineTo(x,y):g.moveTo(x,y)});g.stroke()}
+$('#nSnd').onclick=()=>NZ.snd?nSndStop():nSndStart();
+$('#nSndR').onclick=()=>{Object.assign(NZ,{hist:[],min:1e9,max:-1e9,eS:0,eN:0});nSpark()};
+$('#nCal').onclick=()=>{const r=+$('#nRef').value;if(!(r>0)||NZ.lv<0){$('#nCalI').textContent='Démarre le sonomètre et saisis la valeur de référence.';return}NZ.off+=r-NZ.lv;NZ.lv=r;try{localStorage.setItem('faito-dboff',NZ.off)}catch(e){}$('#nCalI').textContent='Calibré ✓ (décalage '+NZ.off.toFixed(1).replace('.',',')+' dB)'};
+$('#nCal0').onclick=()=>{NZ.off=120;try{localStorage.removeItem('faito-dboff')}catch(e){}$('#nCalI').textContent='Réglage par défaut (non calibré).'};
+/* Lumière */
+const luxCat=l=>l<1?'nuit':l<50?'pénombre':l<150?'salon, ambiance':l<300?'pièce bien éclairée':l<1000?'bureau, lecture':l<10000?'ciel couvert':l<30000?'jour lumineux':'plein soleil';
+function nLxShow(v,unit){NZ.lcur=v;NZ.lmin=Math.min(NZ.lmin,v);NZ.lmax=Math.max(NZ.lmax,v);
+  $('#nLx').textContent=(unit==='lux'?(v<10?v.toFixed(1).replace('.',','):Math.round(v).toLocaleString('fr-FR')):Math.round(v))+' '+(unit==='lux'?'lux':'/ 100');
+  $('#nLxInfo').textContent=unit==='lux'?luxCat(v):'luminosité relative (caméra)';$('#nLxStats').textContent=`Min ${Math.round(NZ.lmin)} · Max ${Math.round(NZ.lmax)}`;
+  const now=Date.now();if(A11Y.blind&&now-NZ.lastSay>6000){NZ.lastSay=now;say(Math.round(v)+(unit==='lux'?' lux':' sur 100'))}
+  if(NZ.saved&&NZ.saved.unit===unit){const r=NZ.saved.v>0?v/NZ.saved.v:0;$('#nLxCmp').textContent=`Comparé à la mesure mémorisée (${Math.round(NZ.saved.v)}) : ${r>=1?'×'+r.toFixed(1).replace('.',',')+' plus lumineux':'×'+(r>0?(1/r).toFixed(1).replace('.',','):'∞')+' moins lumineux'}`}}
+async function nLuxStart(){
+  NZ.lmin=1e9;NZ.lmax=0;NZ.unit='lux';
+  if(typeof NATIVE!=='undefined'&&NATIVE&&UP&&UP.lightStart){try{NZ.lh=await UP.addListener('light',e=>nLxShow(e.lux,'lux'));await UP.lightStart();NZ.lux=true;$('#nLux').textContent='Arrêter le capteur';return}catch(e){$('#nLxInfo').textContent='Capteur de lumière absent sur ce téléphone : utilise la caméra.';return}}
+  if('AmbientLightSensor' in window){try{const s=new AmbientLightSensor();s.onreading=()=>nLxShow(s.illuminance,'lux');s.start();NZ.als=s;NZ.lux=true;$('#nLux').textContent='Arrêter le capteur';return}catch(e){}}
+  $('#nLxInfo').textContent='Capteur de lux disponible seulement dans l\'APK. Ici, utilise la caméra (relatif).'}
+function nLuxStop(){NZ.lux=false;try{NZ.lh&&NZ.lh.remove();typeof UP!=='undefined'&&UP&&UP.lightStop&&UP.lightStop()}catch(e){}try{NZ.als&&NZ.als.stop()}catch(e){}$('#nLux').textContent='Capteur de lumière (lux)'}
+const ncv=document.createElement('canvas'),ng=ncv.getContext('2d',{willReadFrequently:true});
+function nCamLoop(){if(!NZ.cam)return;const v=$('#nVid');if(v.videoWidth){ncv.width=64;ncv.height=48;ng.drawImage(v,v.videoWidth*0.3,v.videoHeight*0.3,v.videoWidth*0.4,v.videoHeight*0.4,0,0,64,48);
+  const d=ng.getImageData(0,0,64,48).data;let s=0;for(let i=0;i<d.length;i+=4)s+=0.2126*LIN[d[i]]+0.7152*LIN[d[i+1]]+0.0722*LIN[d[i+2]];nLxShow(100*s/(d.length/4),'rel')}setTimeout(nCamLoop,200)}
+async function nCamStart(){try{NZ.cst=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false});const v=$('#nVid');v.srcObject=NZ.cst;v.hidden=false;await v.play();
+  try{const tk=NZ.cst.getVideoTracks()[0],cp=tk.getCapabilities&&tk.getCapabilities();if(cp&&cp.exposureMode&&cp.exposureMode.includes('manual'))await tk.applyConstraints({advanced:[{exposureMode:'manual'}]})}catch(e){}
+  NZ.cam=true;NZ.lmin=1e9;NZ.lmax=0;$('#nCamL').textContent='Arrêter la caméra';nCamLoop()}catch(e){$('#nLxInfo').textContent='Caméra bloquée ici : utilise l\'APK.'}}
+function nCamStop(){NZ.cam=false;NZ.cst&&NZ.cst.getTracks().forEach(t=>t.stop());NZ.cst=null;$('#nVid').hidden=true;$('#nCamL').textContent='Avec la caméra (relatif)'}
+$('#nLux').onclick=()=>NZ.lux?nLuxStop():(NZ.cam&&nCamStop(),nLuxStart());
+$('#nCamL').onclick=()=>NZ.cam?nCamStop():(NZ.lux&&nLuxStop(),nCamStart());
+$('#nLxSave').onclick=()=>{if(NZ.lcur==null){$('#nLxCmp').textContent='Lance d\'abord une mesure.';return}NZ.saved={v:NZ.lcur,unit:NZ.cam?'rel':'lux'};$('#nLxCmp').textContent='Mesure mémorisée : '+Math.round(NZ.lcur)+'. Vise une autre source pour comparer.'};
+function nStopAll(){if(NZ.snd)nSndStop();if(NZ.lux)nLuxStop();if(NZ.cam)nCamStop()}
+
 /* ---- Morse + mode sourd : vibrations, flashs, lampe torche ---- */
 const MO={A:'.-',B:'-...',C:'-.-.',D:'-..',E:'.',F:'..-.',G:'--.',H:'....',I:'..',J:'.---',K:'-.-',L:'.-..',M:'--',N:'-.',O:'---',P:'.--.',Q:'--.-',R:'.-.',S:'...',T:'-',U:'..-',V:'...-',W:'.--',X:'-..-',Y:'-.--',Z:'--..',0:'-----',1:'.----',2:'..---',3:'...--',4:'....-',5:'.....',6:'-....',7:'--...',8:'---..',9:'----.','.':'.-.-.-',',':'--..--','?':'..--..','!':'-.-.--',"'":'.----.','-':'-....-','/':'-..-.','@':'.--.-.'};
 const MR=Object.fromEntries(Object.entries(MO).map(([k,v])=>[v,k]));
@@ -1222,28 +1328,67 @@ applyA11y();
 img=sample();ref={a:{x:415,y:150},b:{x:415,y:760}};lines=[{a:{x:620,y:465},b:{x:1020,y:465}},{a:{x:1040,y:480},b:{x:1040,y:760}}];mode='mes';
 VW.side={img:sampleSide(),ref:{a:{x:415,y:150},b:{x:415,y:760}},lines:[{a:{x:640,y:465},b:{x:849,y:465}}],mode:'mes',rl:'204'};
 fit();
-/* ---- Menu : chaque outil dans son onglet ---- */
-{const TABS={wbox:'poids',sbox:'sonar',rbox:'radar',lbox:'laser',cbox:'couleur',mbox:'morse',kbox:'compter',fbox:'couleur',vbox:'vitesse'};
- for(const el of document.querySelector('main').children){if(el.classList.contains('top')||el.classList.contains('motif'))continue;el.dataset.tab=TABS[el.id]||'mesure'}
- let tab='mesure';
- function goTab(t){
-   if(tab==='radar'&&t!=='radar'&&(RD.radar||RD.alert)){RD.radar=RD.alert=false;rBtns()}
-   if(tab==='laser'&&t!=='laser'&&LZ.run)$('#lCam').click();
-   if(tab==='couleur'&&t!=='couleur'&&CZ.run)cStop();
-   if(tab==='couleur'&&t!=='couleur'&&FZ.run)fStop();
-   if(tab==='morse'&&t!=='morse'&&MZ.run)mzStop();
-   if(tab==='vitesse'&&t!=='vitesse'&&VZ.run)vStop();
-   if(tab==='compter'&&t!=='compter'&&KZ.kind==='cam')kStopLive();
-   if(t==='compter')requestAnimationFrame(kDraw);
-   tab=t;document.querySelectorAll('[data-tab]').forEach(el=>el.hidden=el.dataset.tab!==t);
-   document.querySelectorAll('#nav button').forEach(b=>{b.classList.toggle('on',b.dataset.t===t);b.setAttribute('aria-current',b.dataset.t===t?'page':'false')});
-   $('.sub').hidden=t!=='mesure';scrollTo(0,0);
-   if(t==='mesure')requestAnimationFrame(fit);if(t==='poids')wCalc();if(t==='radar')requestAnimationFrame(rDraw);
-   try{localStorage.setItem('faito-tab',t)}catch(e){}
- }
- $('#nav').onclick=e=>{const b=e.target.closest('button');if(b){goTab(b.dataset.t);say('Onglet '+b.textContent.trim())}};
- let saved='mesure';try{saved=localStorage.getItem('faito-tab')||'mesure'}catch(e){}
- goTab(saved);}
+/* ---- Navigation : accueil, 5 familles, sous-onglets ---- */
+{
+const ICON={};document.querySelectorAll('#nav button').forEach(b=>ICON[b.dataset.t]=b.querySelector('svg').outerHTML);
+ICON.home='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9h-6v-6H9v6H3z"/></svg>';
+const FAM=[
+ {id:'mesurer',n:'Mesurer',ic:'mesure',tools:[['photo','Photo','mesure','distances sur photo, vidéo, caméra'],['poids','Poids','poids','volume × matière'],['laser','Laser','laser','pointeur laser + caméra'],['vitesse','Vitesse','vitesse','km/h d\'un objet qui passe']]},
+ {id:'son',n:'Son',ic:'sonar',tools:[['sonar','Sonar','sonar','distance jusqu\'au mur'],['radar','Radar','radar','plan dans le noir, alerte'],['db','Décibels','niveaux','niveau sonore dB(A)']]},
+ {id:'voir',n:'Voir',ic:'couleur',tools:[['couleur','Couleur','couleur','nom de la couleur'],['veille','Veille daltonien','couleur','alerte couleurs difficiles'],['feux','Feux (voiture)','couleur','rouge, orange, freinage'],['lumiere','Lumière','niveaux','luxmètre']]},
+ {id:'compter',n:'Compter',ic:'compter',tools:[['compter','Compter','compter','objets qui se ressemblent']]},
+ {id:'morse',n:'Morse',ic:'morse',tools:[['morse','Morse','morse','vibrations, flashs, caméra']]}];
+const TOOL={};FAM.forEach(f=>f.tools.forEach(([id,n,ic,d])=>TOOL[id]={id,n,ic,d,fam:f.id}));
+const main=document.querySelector('main'),SEC={wbox:'poids',lbox:'laser',vbox:'vitesse',sbox:'sonar',rbox:'radar',nbox:'db lumiere',cbox:'couleur veille',fbox:'feux',kbox:'compter',mbox:'morse'};
+/* sous-navigation et accueil */
+const sub=document.createElement('div');sub.id='subnav';sub.setAttribute('aria-label','Outils de la famille');
+const home=document.createElement('section');home.id='home';main.querySelector('.motif').after(sub,home);
+for(const el of main.children){if(el.classList.contains('top')||el.classList.contains('motif')||el===sub)continue;el.dataset.tools=el===home?'home':(SEC[el.id]||'photo')}
+const nb=$('#nbox');[...nb.children].forEach(c=>{if(c.tagName==='H2'||(c.tagName==='P'&&c.classList.contains('sub')))c.dataset.tools='none'});const nc=nb.querySelectorAll('.ncard');nc[0].dataset.tools='db';nc[1].dataset.tools='lumiere';
+let veil=false;[...$('#cbox').children].forEach(c=>{if(c.tagName==='H3'&&/Veille/.test(c.textContent))veil=true;if(c.tagName==='SMALL'){c.dataset.tools='couleur veille';veil=false;return}
+  c.dataset.tools=veil?'veille':(c.tagName==='H2'||(c.tagName==='P'&&c.classList.contains('sub')))?'couleur':'couleur veille';if(c.id==='wBanner')veil=false});
+let fav=[];try{fav=JSON.parse(localStorage.getItem('faito-fav')||'[]')}catch(e){}
+const last={};try{Object.assign(last,JSON.parse(localStorage.getItem('faito-last')||'{}'))}catch(e){}
+const tile=id=>{const t=TOOL[id];return`<button class="tile" data-go="${id}">${ICON[t.ic]}<b>${t.n}</b><small>${t.d}</small><span class="star${fav.includes(id)?' on':''}" data-star="${id}" role="button" aria-label="${fav.includes(id)?'Retirer des':'Ajouter aux'} favoris">${fav.includes(id)?'★':'☆'}</span></button>`};
+function homeRender(){home.innerHTML=(fav.length?`<h3>★ Favoris</h3><div class="tiles">${fav.filter(f=>TOOL[f]).map(tile).join('')}</div>`:'')+
+  (last._&&TOOL[last._]&&!fav.includes(last._)?`<h3>Reprendre</h3><div class="tiles">${tile(last._)}</div>`:'')+
+  FAM.map(f=>`<h3>${ICON[f.ic]}${f.n}</h3><div class="tiles">${f.tools.map(t=>tile(t[0])).join('')}</div>`).join('')+
+  '<p class="sub" style="margin-top:16px">Touche ☆ pour épingler un outil en favori. Le logo Fāito ramène ici.</p>'}
+home.onclick=e=>{const s=e.target.closest('[data-star]');if(s){const id=s.dataset.star,i=fav.indexOf(id);i>=0?fav.splice(i,1):fav.push(id);try{localStorage.setItem('faito-fav',JSON.stringify(fav))}catch(er){}homeRender();say(i>=0?'Retiré des favoris':'Ajouté aux favoris');return}
+  const b=e.target.closest('[data-go]');if(b){go(b.dataset.go);say('Outil '+TOOL[b.dataset.go].n)}};
+/* barre du bas : accueil + 5 familles */
+$('#nav').innerHTML=`<button data-f="home">${ICON.home}Accueil</button>`+FAM.map(f=>`<button data-f="${f.id}">${ICON[f.ic]}${f.n}</button>`).join('');
+let cur='home';
+const camGroup={couleur:'c',veille:'c'},lux=t=>t==='lumiere';
+function stopFor(from,to){
+  if(from===to)return;
+  if(from==='radar'&&(RD.radar||RD.alert)){RD.radar=RD.alert=false;rBtns()}
+  if(from==='laser'&&LZ.run)$('#lCam').click();
+  if(camGroup[from]&&!camGroup[to]&&CZ.run)cStop();
+  if(from==='feux'&&FZ.run)fStop();
+  if(from==='morse'&&MZ.run)mzStop();
+  if(from==='vitesse'&&VZ.run)vStop();
+  if(from==='db'&&NZ.snd)nSndStop();
+  if(from==='lumiere'){if(NZ.lux)nLuxStop();if(NZ.cam)nCamStop()}
+  if(from==='compter'&&KZ.kind==='cam')kStopLive();
+}
+function go(t){
+  if(!TOOL[t]&&t!=='home')t='home';stopFor(cur,t);cur=t;
+  document.querySelectorAll('[data-tools]').forEach(el=>el.classList.toggle('offtool',!el.dataset.tools.split(' ').includes(t)));
+  const fam=t==='home'?null:FAM.find(f=>f.id===TOOL[t].fam);
+  sub.hidden=!fam||fam.tools.length<2;if(fam&&fam.tools.length>1)sub.innerHTML=fam.tools.map(([id,n])=>`<button data-go="${id}" class="${id===t?'on':''}" aria-pressed="${id===t}">${n}</button>`).join('');
+  document.querySelectorAll('#nav button').forEach(b=>{const on=b.dataset.f===(fam?fam.id:'home');b.classList.toggle('on',on);b.setAttribute('aria-current',on?'page':'false')});
+  if(t==='home')homeRender();else{last[fam.id]=t;last._=t;try{localStorage.setItem('faito-last',JSON.stringify(last))}catch(e){}}
+  scrollTo(0,0);
+  if(t==='photo')requestAnimationFrame(fit);if(t==='poids')wCalc();if(t==='radar')requestAnimationFrame(rDraw);if(t==='compter')requestAnimationFrame(kDraw);
+}
+sub.onclick=e=>{const b=e.target.closest('[data-go]');if(b){go(b.dataset.go);say(TOOL[b.dataset.go].n)}};
+$('#nav').onclick=e=>{const b=e.target.closest('button');if(!b)return;const f=b.dataset.f;if(f==='home'){go('home');say('Accueil');return}
+  const fam=FAM.find(x=>x.id===f);const t=last[f]&&TOOL[last[f]]?last[f]:fam.tools[0][0];go(t);say(fam.n+' : '+TOOL[t].n)};
+$('h1').onclick=()=>{go('home');say('Accueil')};
+window.goTool=go;
+go('home');
+}
 
 }
 </script>
