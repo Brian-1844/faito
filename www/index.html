@@ -210,6 +210,9 @@ h1{cursor:pointer}
 .psim div{border-radius:10px;height:54px;border:1px solid var(--line)}.psim span{display:block;font-size:12px;text-align:center;color:var(--mut);margin-top:3px}
 #pGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:6px;margin-top:8px}
 #pGrid button{min-height:44px;padding:0;border-radius:10px;border:2px solid #0002}#pGrid button.on{outline:3px solid var(--ink);outline-offset:2px}
+.vsbox{border-left-color:#56B4E9}
+#vsCv{display:block;width:100%;border-radius:14px;background:#000}
+#vsRec.on{background:#D55E00;border-color:#D55E00;color:#fff}
 @media(prefers-reduced-motion:no-preference){.dot{transition:background .2s}}
 </style>
 </head>
@@ -276,6 +279,16 @@ h1{cursor:pointer}
     <canvas id="sCv" aria-label="Échos reçus"></canvas>
     <div class="row" style="align-items:center"><label for="sTemp" style="font-weight:600">Température (°C)</label><input id="sTemp" type="number" inputmode="decimal" value="27"><small>La vitesse du son en dépend.</small></div>
     <small>Tiens le téléphone loin du corps, haut-parleur vers le mur, sans rien entre les deux. Les surfaces molles (rideaux, canapé) renvoient mal le son.</small>
+  </section>
+  <section class="sbox vsbox" id="vsbox">
+    <h2>Vidéo + sonar</h2>
+    <p class="sub" style="margin:0">La caméra filme et le sonar bipe en continu : la distance jusqu'à ce que tu vises s'affiche en direct sur l'image, avec une règle à l'échelle. Tu peux enregistrer la vidéo avec la distance incrustée, ou figer une image pour la mesurer.</p>
+    <div class="row"><button id="vsGo" class="pri">Démarrer caméra + sonar</button><button id="vsRec" disabled>⏺ Enregistrer</button><button id="vsSnap" disabled>📸 Figer et mesurer</button></div>
+    <canvas id="vsCv" hidden aria-label="Vidéo avec la distance du sonar"></canvas>
+    <video id="vsVid" playsinline muted hidden></video>
+    <div class="sres"><b id="vsD" aria-live="polite">—</b><span id="vsInfo">Vise un mur ou un grand objet, de 40 cm à 5 m environ.</span></div>
+    <div id="vsSaved" class="sub"></div>
+    <small>Le sonar mesure l'obstacle le plus proche droit devant le téléphone : il correspond au centre de l'image seulement si tu vises une surface assez grande (mur, meuble, porte). La règle suppose que l'objet visé est à cette distance. Le bip du sonar est audible pendant la vidéo.</small>
   </section>
   <section class="sbox rbox" id="rbox">
     <h2>Radar sonar, même dans le noir</h2>
@@ -893,6 +906,47 @@ function lSet(k,inp){if(LZ.last==null){$('#lInfo').textContent='Aucun point lase
   LZ[k]={d:+$(inp).value||0,p:LZ.last};try{localStorage.setItem('faito-laser',JSON.stringify({c1:LZ.c1,c2:LZ.c2}))}catch(e){}lCalInfo();lShow({x:.5,y:LZ.last+.5})}
 $('#lC1').onclick=()=>lSet('c1','#lD1');$('#lC2').onclick=()=>lSet('c2','#lD2');lCalInfo();
 
+/* ---- Vidéo + sonar : distance en direct incrustée sur la vidéo ---- */
+const VS={run:false,stream:null,d:null,ok:[],rec:null,chunks:[],t0:0,lastSay:0};
+function vsDraw(){
+  if(!VS.run)return;const v=$('#vsVid'),c=$('#vsCv');
+  if(v.videoWidth){const W=Math.min(1280,v.videoWidth),H=Math.round(v.videoHeight/v.videoWidth*W);if(c.width!==W){c.width=W;c.height=H}
+    const g=c.getContext('2d');g.drawImage(v,0,0,W,H);const u=W/400,cx=W/2,cy=H/2;
+    g.lineWidth=3*u;for(const[col,lw]of[['#000',6*u],['#fff',2.5*u]]){g.strokeStyle=col;g.lineWidth=lw;g.beginPath();g.arc(cx,cy,22*u,0,7);g.moveTo(cx-40*u,cy);g.lineTo(cx-12*u,cy);g.moveTo(cx+12*u,cy);g.lineTo(cx+40*u,cy);g.moveTo(cx,cy-40*u);g.lineTo(cx,cy-12*u);g.moveTo(cx,cy+12*u);g.lineTo(cx,cy+40*u);g.stroke()}
+    const txt=VS.d?fmt(VS.d*100):'…';g.font=`700 ${34*u}px "Barlow Condensed",sans-serif`;const tw=g.measureText(txt).width+24*u;
+    g.fillStyle=VS.d?'rgba(10,116,128,.88)':'rgba(0,0,0,.6)';g.beginPath();g.roundRect(cx-tw/2,cy+52*u,tw,46*u,10*u);g.fill();g.fillStyle='#fff';g.textAlign='center';g.textBaseline='middle';g.fillText(txt,cx,cy+75*u);
+    if(VS.d){const cmpx=2*VS.d*100*TANH/Math.max(W,H);let L=[5,10,20,50,100,200,500].find(l=>l/cmpx>=W*0.15)||500;const px=L/cmpx;
+      const x0=16*u,y0=H-22*u;g.fillStyle='rgba(0,0,0,.55)';g.fillRect(x0-6*u,y0-30*u,px+12*u,40*u);g.fillStyle='#ffc928';g.fillRect(x0,y0-4*u,px,8*u);g.fillRect(x0,y0-14*u,3*u,20*u);g.fillRect(x0+px-3*u,y0-14*u,3*u,20*u);
+      g.fillStyle='#fff';g.font=`600 ${15*u}px Barlow,sans-serif`;g.textAlign='left';g.textBaseline='alphabetic';g.fillText(L>=100?(L/100)+' m':L+' cm',x0,y0-12*u)}
+    if(VS.rec){const s=Math.floor((performance.now()-VS.t0)/1000);g.fillStyle='#D55E00';g.beginPath();g.arc(W-60*u,22*u,8*u,0,7);g.fill();g.fillStyle='#fff';g.font=`700 ${16*u}px Barlow,sans-serif`;g.textAlign='left';g.textBaseline='middle';g.fillText(String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'),W-48*u,22*u)}}
+  requestAnimationFrame(vsDraw)}
+async function vsSonar(){
+  while(VS.run){let r=null;try{r=await ping()}catch(e){$('#vsInfo').textContent=e.name==='NotAllowedError'||e.name==='SecurityError'?'Micro bloqué ici : utilise l\'APK.':'Erreur sonar : '+e.message;break}
+    if(!VS.run)break;
+    if(r.ok){VS.ok.push(r.m);if(VS.ok.length>3)VS.ok.shift();const s=[...VS.ok].sort((a,b)=>a-b);VS.d=s[s.length>>1];$('#vsD').textContent=fmt(VS.d*100);$('#vsInfo').textContent=`Écho net · ${TCAL?'caméra calibrée':'règle approximative (caméra non calibrée)'}`;
+      const now=Date.now();if(A11Y.blind&&now-VS.lastSay>5000){VS.lastSay=now;say(spk(VS.d*100))}}
+    else $('#vsInfo').textContent='Pas d\'écho clair : vise une surface plus grande ou plus proche.';
+    await wait(60)}}
+async function vsStart(){
+  try{VS.stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}},audio:false});const v=$('#vsVid');v.srcObject=VS.stream;await v.play();
+    VS.run=true;VS.d=null;VS.ok=[];$('#vsCv').hidden=false;$('#vsGo').textContent='Arrêter';$('#vsRec').disabled=false;$('#vsSnap').disabled=false;vsDraw();vsSonar()}
+  catch(e){$('#vsInfo').textContent='Caméra bloquée ici : utilise l\'APK.'}}
+function vsStop(){if(VS.rec)vsRecStop();VS.run=false;VS.stream&&VS.stream.getTracks().forEach(t=>t.stop());VS.stream=null;$('#vsCv').hidden=true;$('#vsGo').textContent='Démarrer caméra + sonar';$('#vsRec').disabled=true;$('#vsSnap').disabled=true}
+function vsRecStart(){const c=$('#vsCv');if(!c.captureStream||!window.MediaRecorder){$('#vsSaved').textContent='Enregistrement non pris en charge sur cet appareil.';return}
+  const mt=['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm','video/mp4'].find(m=>MediaRecorder.isTypeSupported(m))||'';
+  VS.chunks=[];VS.rec=new MediaRecorder(c.captureStream(30),mt?{mimeType:mt,videoBitsPerSecond:4e6}:{});VS.rec.ondataavailable=e=>{if(e.data.size)VS.chunks.push(e.data)};VS.rec.onstop=vsSave;VS.rec.start(1000);VS.t0=performance.now();
+  $('#vsRec').textContent='⏹ Arrêter l\'enregistrement';$('#vsRec').classList.add('on');$('#vsSaved').textContent='Enregistrement en cours…'}
+function vsRecStop(){const r=VS.rec;VS.rec=null;if(r&&r.state!=='inactive')r.stop();$('#vsRec').textContent='⏺ Enregistrer';$('#vsRec').classList.remove('on')}
+async function vsSave(){const type=(VS.chunks[0]&&VS.chunks[0].type)||'video/webm',blob=new Blob(VS.chunks,{type}),ext=type.includes('mp4')?'mp4':'webm',name=`faito-sonar-${new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')}.${ext}`;
+  const mo=(blob.size/1048576).toFixed(1).replace('.',',');
+  if(typeof NATIVE!=='undefined'&&NATIVE&&UP&&UP.saveFile){$('#vsSaved').textContent='Sauvegarde…';try{const b64=await new Promise((ok,ko)=>{const fr=new FileReader();fr.onload=()=>ok(String(fr.result).split(',')[1]);fr.onerror=ko;fr.readAsDataURL(blob)});
+      const r=await UP.saveFile({data:b64,name,mime:type.split(';')[0]});$('#vsSaved').textContent=`Vidéo enregistrée (${mo} Mo) : ${r.path}`;say('Vidéo enregistrée')}catch(e){$('#vsSaved').textContent='Échec de la sauvegarde : '+e.message}return}
+  const u=URL.createObjectURL(blob);$('#vsSaved').innerHTML=`Vidéo prête (${mo} Mo) : <a href="${u}" download="${name}">télécharger ${name}</a>`}
+$('#vsGo').onclick=()=>VS.run?vsStop():vsStart();
+$('#vsRec').onclick=()=>VS.rec?vsRecStop():vsRecStart();
+$('#vsSnap').onclick=()=>{const v=$('#vsVid');if(!v.videoWidth)return;const c=document.createElement('canvas');c.width=v.videoWidth;c.height=v.videoHeight;c.getContext('2d').drawImage(v,0,0);
+  const d=VS.d;vsStop();if(d){SON.d=d*100;SON.use=true;$('#snD').value=Math.round(SON.d)}goTool('photo');setImg(c);note(d?`Image figée avec la distance sonar (${fmt(d*100)}) : trace tes mesures.`:'Image figée sans écho sonar : trace un repère ou saisis la distance.')};
+
 /* ---- Radar sonar + alerte obstacle ---- */
 const RD={pts:[],head:0,ori:false,radar:false,alert:false,loop:false};
 function onOri(e){let h=null;if(e.webkitCompassHeading!=null)h=e.webkitCompassHeading;else if(e.alpha!=null)h=360-e.alpha;if(h!=null){RD.head=(h+360)%360;RD.ori=true}}
@@ -1473,12 +1527,12 @@ ICON.calc='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-wid
 ICON.home='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9h-6v-6H9v6H3z"/></svg>';
 const FAM=[
  {id:'mesurer',n:'Mesurer',ic:'mesure',tools:[['photo','Photo','mesure','distances sur photo, vidéo, caméra'],['poids','Poids','poids','volume × matière'],['laser','Laser','laser','pointeur laser + caméra'],['vitesse','Vitesse','vitesse','km/h d\'un objet qui passe']]},
- {id:'son',n:'Son',ic:'sonar',tools:[['sonar','Sonar','sonar','distance jusqu\'au mur'],['radar','Radar','radar','plan dans le noir, alerte'],['db','Décibels','niveaux','niveau sonore dB(A)']]},
+ {id:'son',n:'Son',ic:'sonar',tools:[['sonar','Sonar','sonar','distance jusqu\'au mur'],['vsonar','Vidéo + sonar','sonar','distance en direct sur la vidéo'],['radar','Radar','radar','plan dans le noir, alerte'],['db','Décibels','niveaux','niveau sonore dB(A)']]},
  {id:'voir',n:'Voir',ic:'couleur',tools:[['couleur','Couleur','couleur','nom de la couleur'],['nuancier','Nuancier','couleur','choisir une couleur précise'],['veille','Veille daltonien','couleur','alerte couleurs difficiles'],['feux','Feux (voiture)','couleur','rouge, orange, freinage'],['lumiere','Lumière','niveaux','luxmètre']]},
  {id:'compter',n:'Compter',ic:'compter',tools:[['compter','Compter','compter','objets qui se ressemblent'],['calc','Calculatrice','calc','calculs simples, avec tes mesures']]},
  {id:'morse',n:'Morse',ic:'morse',tools:[['morse','Morse','morse','vibrations, flashs, caméra']]}];
 const TOOL={};FAM.forEach(f=>f.tools.forEach(([id,n,ic,d])=>TOOL[id]={id,n,ic,d,fam:f.id}));
-const main=document.querySelector('main'),SEC={wbox:'poids',lbox:'laser',vbox:'vitesse',sbox:'sonar',rbox:'radar',nbox:'db lumiere',cbox:'couleur veille',fbox:'feux',pickbox:'nuancier',kbox:'compter',mbox:'morse',calcbox:'calc'};
+const main=document.querySelector('main'),SEC={wbox:'poids',lbox:'laser',vbox:'vitesse',sbox:'sonar',vsbox:'vsonar',rbox:'radar',nbox:'db lumiere',cbox:'couleur veille',fbox:'feux',pickbox:'nuancier',kbox:'compter',mbox:'morse',calcbox:'calc'};
 /* sous-navigation et accueil */
 const sub=document.createElement('div');sub.id='subnav';sub.setAttribute('aria-label','Outils de la famille');
 const home=document.createElement('section');home.id='home';main.querySelector('.motif').after(sub,home);
@@ -1501,6 +1555,7 @@ let cur='home';
 const camGroup={couleur:'c',veille:'c'},lux=t=>t==='lumiere';
 function stopFor(from,to){
   if(from===to)return;
+  if(from==='vsonar'&&VS.run)vsStop();
   if(from==='radar'&&(RD.radar||RD.alert)){RD.radar=RD.alert=false;rBtns()}
   if(from==='laser'&&LZ.run)$('#lCam').click();
   if(camGroup[from]&&!camGroup[to]&&CZ.run)cStop();

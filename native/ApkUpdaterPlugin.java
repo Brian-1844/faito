@@ -197,6 +197,41 @@ public class ApkUpdaterPlugin extends Plugin {
         call.resolve(o);
     }
 
+    /** Enregistre un fichier (vidéo) dans Films/Faito. */
+    @PluginMethod
+    public void saveFile(PluginCall call) {
+        final String data = call.getString("data");
+        final String name = call.getString("name", "faito.webm");
+        final String mime = call.getString("mime", "video/webm");
+        if (data == null) { call.reject("Aucune donnée"); return; }
+        new Thread(() -> {
+            try {
+                byte[] bytes = android.util.Base64.decode(data, android.util.Base64.DEFAULT);
+                String where;
+                if (Build.VERSION.SDK_INT >= 29) {
+                    android.content.ContentValues v = new android.content.ContentValues();
+                    v.put(android.provider.MediaStore.MediaColumns.DISPLAY_NAME, name);
+                    v.put(android.provider.MediaStore.MediaColumns.MIME_TYPE, mime);
+                    v.put(android.provider.MediaStore.MediaColumns.RELATIVE_PATH, android.os.Environment.DIRECTORY_MOVIES + "/Faito");
+                    Uri u = getContext().getContentResolver().insert(android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI, v);
+                    if (u == null) throw new Exception("insertion impossible");
+                    try (OutputStream os = getContext().getContentResolver().openOutputStream(u)) { os.write(bytes); }
+                    where = "Films/Faito/" + name;
+                } else {
+                    File dir = getContext().getExternalFilesDir(android.os.Environment.DIRECTORY_MOVIES);
+                    File f = new File(dir, name);
+                    try (OutputStream os = new FileOutputStream(f)) { os.write(bytes); }
+                    where = f.getAbsolutePath();
+                }
+                JSObject r = new JSObject();
+                r.put("path", where);
+                call.resolve(r);
+            } catch (Exception e) {
+                call.reject(e.getMessage());
+            }
+        }).start();
+    }
+
     /** Ouvre une adresse dans Chrome (utile pour le mode AR / WebXR). */
     @PluginMethod
     public void openExternal(PluginCall call) {
