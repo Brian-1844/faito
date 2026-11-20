@@ -132,6 +132,21 @@ html.dalto{--tape:#E69F00;--lag:#0072B2}
 .mtab span{background:var(--bg);border-radius:8px;padding:4px 6px}
 #flash{position:fixed;inset:0;z-index:40;pointer-events:none;opacity:0;background:#fff;transition:opacity .05s}
 #flash.on{opacity:1}#flash.edge{background:none;box-shadow:inset 0 0 0 14px var(--ec,#e33b3b)}
+#wBanner{display:none;margin:10px 0;padding:12px 14px;border-radius:12px;background:#D55E00;color:#fff;font:700 20px Barlow,sans-serif}
+#wBanner.on{display:block}
+.wsel{font:600 16px Barlow,sans-serif;min-height:44px;padding:0 10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+#nav{grid-template-columns:repeat(8,minmax(0,1fr))}#nav button{font-size:9.5px;padding:4px 0}#nav{padding-left:2px;padding-right:2px}
+.kbox{border-left-color:#F0E442}
+.kfig{position:relative;border-radius:14px;overflow:hidden;background:#000;touch-action:none;margin:8px 0}
+#kCv{display:block;width:100%;touch-action:none;cursor:crosshair}
+#kN{font:700 clamp(40px,11vw,60px)/1 "Barlow Condensed";white-space:nowrap}
+.kchip{display:inline-flex;align-items:center;border-radius:99px;border:1px solid var(--line);background:var(--bg);overflow:hidden}
+.kchip button{border:0;border-radius:0;min-height:40px;background:none}.kchip button.on{background:var(--ink);color:var(--bg)}
+.fbox{border-left-color:#D55E00}
+#fBanner{font:700 clamp(28px,8vw,40px)/1.1 "Barlow Condensed",sans-serif;padding:16px;border-radius:14px;text-align:center;background:var(--bg);margin:10px 0;border:3px solid var(--line)}
+#fBanner.al{color:#fff;border-color:transparent}
+.fwarn{background:var(--bg);border-radius:12px;padding:10px 14px;margin:10px 0;border-left:5px solid #D55E00}
+.fwarn li{margin:3px 0}
 @media(prefers-reduced-motion:no-preference){.dot{transition:background .2s}}
 </style>
 </head>
@@ -204,7 +219,42 @@ html.dalto{--tape:#E69F00;--lag:#0072B2}
     <div class="row"><button id="cCam" class="pri">Démarrer la caméra</button><label class="btn">Analyser une photo<input id="cFile" type="file" accept="image/*" capture="environment"></label></div>
     <div id="cStage" hidden><video id="cVid" playsinline muted></video><canvas id="cImg" class="img" hidden></canvas><canvas id="cOv"></canvas></div>
     <div class="cres"><div id="cSw" aria-hidden="true"></div><div><div id="cName" aria-live="polite">—</div><div id="cHex">Aucune couleur analysée</div></div></div>
+    <h3 style="font:700 18px 'Barlow Condensed';margin:16px 0 2px">Veille daltonien</h3>
+    <p class="sub" style="margin:0">La caméra reste allumée et surveille l'image : quand une couleur difficile à voir pour toi apparaît, l'app la hachure à l'écran et lance une alerte (vibration, voix, bandeau).</p>
+    <div class="row" style="align-items:center"><select id="wType" class="wsel" aria-label="Type de daltonisme"><option value="deut">Deutéranopie (vert)</option><option value="prot">Protanopie (rouge)</option><option value="trit">Tritanopie (bleu-jaune)</option></select><button id="wGo" class="pri">Démarrer la veille</button></div>
+    <div class="row" style="align-items:center"><label for="wSens" style="font-weight:600">Sensibilité</label><input id="wSens" type="range" min="1" max="10" value="5" style="flex:1;accent-color:#cc79a7"></div>
+    <div class="row" style="align-items:center"><label for="wFreq" style="font-weight:600">Fréquence d'analyse</label><select id="wFreq" class="wsel"><option value="2">Économie · 2 fois/s</option><option value="5" selected>Normal · 5 fois/s</option><option value="10">Rapide · 10 fois/s</option><option value="15">En voiture · 15 fois/s</option></select></div>
+    <p id="wCar" class="sub" hidden style="margin:0;padding:10px 12px;border-radius:10px;background:var(--bg);border-left:5px solid #D55E00">🚗 Mode voiture : analyse la plus rapide, alertes surtout vocales et répétées plus vite. Réservé aux <b>passagers</b> : ne regarde pas l'écran en conduisant. Ne te fie jamais à l'app pour les feux tricolores ou la signalisation.</p>
+    <div id="wBanner" role="alert"></div>
     <small>La couleur perçue dépend de l'éclairage : en lumière jaune ou dans l'ombre, le nom peut changer. Préfère la lumière du jour.</small>
+  </section>
+  <section class="sbox fbox" id="fbox">
+    <h2>Assistant feux (en voiture)</h2>
+    <p class="sub" style="margin:0">Téléphone fixé au tableau de bord, caméra vers la route : l'app repère les feux rouges et orange, et les voitures devant qui freinent, puis l'annonce à voix haute.</p>
+    <div class="fwarn"><b>Limites importantes</b><ul style="margin:6px 0 0;padding-left:20px">
+      <li>C'est une <b>aide d'appoint</b> : elle peut se tromper ou <b>rater un feu</b> (soleil, reflets, pluie, feux LED).</li>
+      <li>Elle n'annonce <b>jamais le vert</b> : c'est toujours à toi de vérifier que tu peux passer.</li>
+      <li>Ne regarde pas l'écran en roulant. Repère habituel : le rouge est toujours <b>en haut</b> du feu.</li></ul></div>
+    <label class="opt" style="border:0"><input type="checkbox" id="fOk"><div><b>J'ai compris</b><span>Je regarde toujours la route, je respecte le code de la route, et je reste seul responsable de ma conduite.</span></div></label>
+    <div class="row"><button id="fGo" class="pri" disabled>Démarrer l'assistant</button></div>
+    <div id="fStage" class="kfig" hidden><video id="fVid" playsinline muted style="display:block;width:100%"></video><canvas id="fOv" style="position:absolute;inset:0;width:100%;height:100%"></canvas></div>
+    <div id="fBanner" aria-live="assertive">Assistant arrêté</div>
+  </section>
+  <section class="sbox kbox" id="kbox">
+    <h2>Compter des objets</h2>
+    <p class="sub" style="margin:0">Ouvre une photo, une vidéo ou la caméra, puis <b>entoure un exemple</b> avec le doigt : l'app compte tous les objets qui lui ressemblent (couleur et taille). Touche un cadre pour l'exclure, ou un endroit vide pour ajouter un objet oublié.</p>
+    <div class="row"><label class="btn">Prendre une photo<input id="kCam1" type="file" accept="image/*" capture="environment"></label><label class="btn">Ouvrir photo ou vidéo<input id="kFile" type="file" accept="image/*,video/*"></label><button id="kLive">Caméra en direct</button></div>
+    <div class="kfig"><canvas id="kCv" aria-label="Image analysée, objets comptés encadrés"></canvas></div>
+    <video id="kVid" playsinline muted controls hidden style="width:100%;border-radius:12px"></video>
+    <p id="kHint" style="font-weight:600;margin:6px 0"></p>
+    <div class="sres"><b id="kN" aria-live="polite">—</b><span id="kInfo"></span></div>
+    <div class="row"><button id="kNew">Nouvel exemple</button><button id="kReset">Effacer corrections</button></div>
+    <label for="kTol" style="font-weight:600;display:block;margin-top:6px">Tolérance de couleur</label>
+    <input id="kTol" type="range" min="2" max="10" value="5" style="width:100%;height:40px;accent-color:#c9a800">
+    <h3 style="font:700 18px 'Barlow Condensed';margin:12px 0 2px">Types d'objets enregistrés</h3>
+    <div class="row"><input id="kName" class="wsel" style="flex:1" placeholder="Nom, ex. noix de coco" aria-label="Nom du type d'objet"><button id="kSave" class="pri">Enregistrer ce type</button></div>
+    <div class="row" id="kList"></div>
+    <small>Marche le mieux avec des objets d'une couleur nette sur un fond différent : fruits, bouteilles, pièces, bouées… Les objets collés sont estimés d'après leur taille. Sur une vidéo, l'app compte l'image affichée et retient le maximum vu (elle ne suit pas chaque objet d'une image à l'autre).</small>
   </section>
   <section class="sbox mbox" id="mbox">
     <h2>Morse : messages par vibrations</h2>
@@ -266,6 +316,7 @@ html.dalto{--tape:#E69F00;--lag:#0072B2}
   <button data-t="radar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><path d="M12 12l6-6"/></svg>Radar</button>
   <button data-t="laser"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="9" width="9" height="6" rx="1.5"/><path d="M11 12h8" stroke-dasharray="2 2"/><circle cx="21" cy="12" r="1.6" fill="currentColor"/></svg>Laser</button>
   <button data-t="couleur"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a9 9 0 1 0 0 18c1.5 0 2-1 2-2s-1-1.5-1-2.5 1-1.5 2-1.5h2a4 4 0 0 0 4-4c0-4.5-4-8-9-8z"/><circle cx="7.5" cy="11" r="1.3" fill="currentColor"/><circle cx="10" cy="7" r="1.3" fill="currentColor"/><circle cx="15" cy="7.5" r="1.3" fill="currentColor"/></svg>Couleur</button>
+  <button data-t="compter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M17.5 14v7M14 17.5h7" stroke-linecap="round"/></svg>Compter</button>
   <button data-t="morse"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="4" cy="12" r="1.5" fill="currentColor"/><path d="M9 12h5"/><circle cx="19" cy="12" r="1.5" fill="currentColor"/><path d="M3 6h3M9 6h8M3 18h8M15 18h6" stroke-width="1.6" opacity=".5"/></svg>Morse</button>
 </nav>
 <div id="flash" aria-hidden="true"></div>
@@ -555,7 +606,7 @@ const STEPS=[
  {t:'2. Mesure en bleu',p:['Glisse le doigt d\'un bout à l\'autre de ce que tu veux mesurer. La loupe t\'aide à viser juste.','Touche un point pour l\'ajuster. Le repère et l\'objet doivent être à la même distance.'],s:`<path d="M30 150L150 70" stroke="#13a9b8" stroke-width="7" stroke-linecap="round"/><circle cx="30" cy="150" r="10" fill="#13a9b8"/><circle cx="150" cy="70" r="10" fill="#13a9b8"/><circle cx="150" cy="70" r="34" fill="none" stroke="#fff" stroke-width="5"/><path d="M174 94l16 16" stroke="#fff" stroke-width="8" stroke-linecap="round"/><rect x="56" y="104" width="62" height="26" rx="7" fill="#13a9b8"/><text x="87" y="123" fill="#fff" font-size="16" font-weight="700" text-anchor="middle" font-family="sans-serif">45 cm</text>`},
  {t:'3. Estime le poids',p:['Mesure l\'objet <b>de face</b>, puis ouvre <b>Vue de côté</b> pour sa profondeur.','Choisis la forme et la matière, et Fāito calcule le poids : volume × densité.'],s:TURTLE},
  {t:'4. Sonar',p:['Pas de photo ? Appuie sur <b>Bip</b> : le téléphone écoute l\'écho et donne la distance jusqu\'au mur.','Dans le noir, le <b>radar</b> dessine la pièce pendant que tu tournes sur toi-même.'],s:`${[40,70,100].map(r=>`<path d="M${60+r*0.2} ${100-r} A${r} ${r} 0 0 1 ${60+r*0.2} ${100+r}" fill="none" stroke="#8f7aa8" stroke-width="7" stroke-linecap="round" transform="translate(${r*0.6} 0)"/>`).join('')}<rect x="20" y="70" width="34" height="60" rx="8" fill="#13a9b8"/><rect x="170" y="30" width="12" height="140" fill="#ffc928"/>`},
- {t:'Mauruuru !',p:['Le bouton <b>accessibilité</b> en haut active le mode non-voyant (voix), daltonien ou sourd (vibrations).','Le <b>menu en bas</b> range les outils : Mesure, Poids, Sonar, Radar, Laser, Couleur et Morse.','Tu peux revoir ce tutoriel avec le bouton <b>?</b> en haut.'],s:SUN}
+ {t:'Mauruuru !',p:['Le bouton <b>accessibilité</b> en haut active le mode non-voyant (voix), daltonien ou sourd (vibrations).','Le <b>menu en bas</b> range les outils : Mesure, Poids, Sonar, Radar, Laser, Couleur, Compter et Morse.','Tu peux revoir ce tutoriel avec le bouton <b>?</b> en haut.'],s:SUN}
 ];
 let hs=0;const hello=$('#hello');
 function hShow(){const st=STEPS[hs];
@@ -718,8 +769,8 @@ function cSample(src,x,y,w,h){const k=Math.max(3,Math.round(Math.min(w,h)/60));c
   const d=cg.getImageData(0,0,k,k).data;let r=0,g=0,b=0,n=0;for(let i=0;i<d.length;i+=4){r+=d[i];g+=d[i+1];b+=d[i+2];n++}return[r/n|0,g/n|0,b/n|0]}
 function cCross(x,y){const o=$('#cOv'),W=o.clientWidth,H=o.clientHeight,dp=devicePixelRatio||1;o.width=W*dp;o.height=H*dp;const g=o.getContext('2d');g.setTransform(dp,0,0,dp,0,0);
   for(const[c,w]of[['#000',5],['#fff',2.5]]){g.strokeStyle=c;g.lineWidth=w;g.beginPath();g.arc(x*W,y*H,16,0,7);g.moveTo(x*W-26,y*H);g.lineTo(x*W-10,y*H);g.moveTo(x*W+10,y*H);g.lineTo(x*W+26,y*H);g.moveTo(x*W,y*H-26);g.lineTo(x*W,y*H-10);g.moveTo(x*W,y*H+10);g.lineTo(x*W,y*H+26);g.stroke()}}
-function cLoop(){if(!CZ.run)return;const v=$('#cVid');if(v.videoWidth){cShow(...cSample(v,v.videoWidth/2,v.videoHeight/2,v.videoWidth,v.videoHeight));cCross(.5,.5)}setTimeout(()=>requestAnimationFrame(cLoop),120)}
-function cStop(){CZ.run=false;CZ.stream&&CZ.stream.getTracks().forEach(t=>t.stop());CZ.stream=null;$('#cCam').textContent='Démarrer la caméra'}
+function cLoop(){if(!CZ.run)return;const v=$('#cVid');if(v.videoWidth){cShow(...cSample(v,v.videoWidth/2,v.videoHeight/2,v.videoWidth,v.videoHeight));cCross(.5,.5);if(WZ.on)wRun(v,v.videoWidth,v.videoHeight)}setTimeout(()=>requestAnimationFrame(cLoop),WZ.on?Math.max(0,1000/(+$('#wFreq').value||5)-15):120)}
+function cStop(){CZ.run=false;if(WZ.on){WZ.mask=null;WZ.hits=0;$('#wBanner').className=''}CZ.stream&&CZ.stream.getTracks().forEach(t=>t.stop());CZ.stream=null;$('#cCam').textContent='Démarrer la caméra'}
 $('#cCam').onclick=async()=>{
   if(CZ.run){cStop();return}
   try{CZ.stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false});const v=$('#cVid');v.hidden=false;$('#cImg').hidden=true;v.srcObject=CZ.stream;await v.play();
@@ -728,9 +779,188 @@ $('#cCam').onclick=async()=>{
 };
 $('#cFile').onchange=e=>{const f=e.target.files[0];if(!f)return;cStop();const i=new Image();i.onload=()=>{
   const c=$('#cImg');c.width=i.width;c.height=i.height;c.getContext('2d').drawImage(i,0,0);c.hidden=false;$('#cVid').hidden=true;$('#cStage').hidden=false;
-  requestAnimationFrame(()=>{cShow(...cSample(c,i.width/2,i.height/2,i.width,i.height));cCross(.5,.5)});$('#cHex').textContent+=' · touche la photo pour changer de point'};i.src=URL.createObjectURL(f)};
+  requestAnimationFrame(()=>{cShow(...cSample(c,i.width/2,i.height/2,i.width,i.height));cCross(.5,.5);if(WZ.on)wRun(c,i.width,i.height,true)});$('#cHex').textContent+=' · touche la photo pour changer de point'};i.src=URL.createObjectURL(f)};
 $('#cImg').addEventListener('pointerdown',e=>{const c=e.currentTarget,r=c.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;
   CZ.said='';CZ.since=0;const px=cSample(c,x*c.width,y*c.height,c.width,c.height);cShow(...px);CZ.said=CZ.last;say(CZ.last);cCross(x,y)});
+
+/* ---- Veille daltonien : repère les couleurs qui changent le plus pour un type de daltonisme ---- */
+const SIM={deut:[0.367322,0.860646,-0.227968,0.280085,0.672501,0.047413,-0.011820,0.042940,0.968881],prot:[0.152286,1.052583,-0.204868,0.114503,0.786281,0.099216,-0.003882,-0.048116,1.051998],trit:[1.255528,-0.076749,-0.178779,-0.078411,0.930809,0.147602,0.004733,0.691367,0.303900]};
+const LIN=new Float32Array(256);for(let i=0;i<256;i++){const c=i/255;LIN[i]=c<=0.04045?c/12.92:((c+0.055)/1.055)**2.4}
+function lab(r,g,b){const X=(0.4124*r+0.3576*g+0.1805*b)/0.95047,Y=0.2126*r+0.7152*g+0.0722*b,Z=(0.0193*r+0.1192*g+0.9505*b)/1.08883;const f=t=>t>0.008856?Math.cbrt(t):7.787*t+16/116;const fx=f(X),fy=f(Y),fz=f(Z);return[116*fy-16,500*(fx-fy),200*(fy-fz)]}
+const WZ={on:false,hits:0,lastName:'',lastT:0,mask:null,W:0,H:0};
+const wcv=document.createElement('canvas'),wg=wcv.getContext('2d',{willReadFrequently:true});
+function cWatch(src,w,h){
+  const W=96,H=Math.max(1,Math.round(h/w*W));wcv.width=W;wcv.height=H;wg.drawImage(src,0,0,W,H);
+  const d=wg.getImageData(0,0,W,H).data,M=SIM[$('#wType').value],sens=+$('#wSens').value,thr=34-sens*2.4,mask=new Uint8Array(W*H),cnt={};let n=0;
+  for(let i=0,j=0;i<d.length;i+=4,j++){const r=LIN[d[i]],g=LIN[d[i+1]],b=LIN[d[i+2]],o=lab(r,g,b);
+    if(o[0]<12||Math.hypot(o[1],o[2])<22)continue;
+    const s=lab(Math.max(0,M[0]*r+M[1]*g+M[2]*b),Math.max(0,M[3]*r+M[4]*g+M[5]*b),Math.max(0,M[6]*r+M[7]*g+M[8]*b));
+    if(Math.hypot(o[0]-s[0],o[1]-s[1],o[2]-s[2])>thr){mask[j]=1;n++;const nm=cName(d[i],d[i+1],d[i+2]).replace(/ (foncé|clair)$/,'');cnt[nm]=(cnt[nm]||0)+1}}
+  WZ.mask=mask;WZ.W=W;WZ.H=H;const frac=n/(W*H);
+  if(!(frac>0.02+0.004*(10-sens)))return null;const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1]).filter(([k,v],i)=>i===0||v>n*0.25).slice(0,2).map(e=>e[0]);
+  return{name:top.join(' et '),plural:top.length>1,frac};
+}
+function wDraw(){
+  if(!WZ.mask)return;const o=$('#cOv'),g=o.getContext('2d'),cw=o.clientWidth,ch=o.clientHeight,sx=cw/WZ.W,sy=ch/WZ.H;
+  g.save();g.beginPath();for(let y=0;y<WZ.H;y++)for(let x=0;x<WZ.W;x++)if(WZ.mask[y*WZ.W+x])g.rect(x*sx,y*sy,sx+0.5,sy+0.5);g.clip();
+  g.lineWidth=3;for(let k=-ch;k<cw;k+=10){g.strokeStyle='#000c';g.beginPath();g.moveTo(k,0);g.lineTo(k+ch,ch);g.stroke();g.strokeStyle='#fffc';g.beginPath();g.moveTo(k+5,0);g.lineTo(k+5+ch,ch);g.stroke()}g.restore();
+}
+function wAlert(res,once){
+  const b=$('#wBanner');
+  if(!res){WZ.hits=once?0:Math.max(0,WZ.hits-1);if(!WZ.hits)b.className='';return}
+  WZ.hits=once?2:Math.min(5,WZ.hits+1);if(WZ.hits<2)return;
+  b.className='on';b.textContent=`⚠ ${res.name} : ${res.plural?'difficiles':'difficile'} à voir pour toi (${Math.round(res.frac*100)} % de l'image, zone hachurée)`;
+  const now=Date.now();if(res.name!==WZ.lastName||now-WZ.lastT>(+$('#wFreq').value>=15?2500:5000)){WZ.lastName=res.name;WZ.lastT=now;navigator.vibrate&&navigator.vibrate([200,100,200]);say('Attention : '+res.name+(res.plural?' détectés':' détecté'),true)}
+}
+function wRun(src,w,h,once){const r=cWatch(src,w,h);wDraw();wAlert(r,once)}
+$('#wGo').onclick=async()=>{
+  WZ.on=!WZ.on;$('#wGo').textContent=WZ.on?'Arrêter la veille':'Démarrer la veille';
+  if(!WZ.on){WZ.mask=null;$('#wBanner').className='';WZ.hits=0;return}
+  const c=$('#cImg');if(!c.hidden&&!CZ.run){cCross(.5,.5);wRun(c,c.width,c.height,true);return}
+  if(!CZ.run)$('#cCam').click();
+};
+$('#wFreq').onchange=()=>{$('#wCar').hidden=+$('#wFreq').value<15;try{localStorage.setItem('faito-wfreq',$('#wFreq').value)}catch(e){}};
+try{const v=localStorage.getItem('faito-wfreq');if(v){$('#wFreq').value=v;$('#wCar').hidden=+v<15}}catch(e){}
+$('#wType').onchange=$('#wSens').oninput=()=>{const c=$('#cImg');if(WZ.on&&!CZ.run&&!c.hidden){cCross(.5,.5);wRun(c,c.width,c.height,true)}};
+
+/* ---- Compter des objets : apprentissage d'un exemple (couleur + taille) ---- */
+const KZ={src:null,kind:null,model:null,refA:0,mode:'learn',ex:[],add:[],res:null,max:0,run:false,stream:null,drag:null,W:0,H:0,L:null,lastN:-1,said:-1,sT:0};
+const kcv=$('#kCv'),kctx=kcv.getContext('2d'),kan=document.createElement('canvas'),kag=kan.getContext('2d',{willReadFrequently:true});
+let KM=[];try{KM=JSON.parse(localStorage.getItem('faito-models')||'[]')}catch(e){}
+const kDim=()=>{const s=KZ.src;return s?[s.videoWidth||s.width,s.videoHeight||s.height]:[0,0]};
+function kGrab(){const[w,h]=kDim();if(!w)return false;const W=240,H=Math.max(1,Math.round(h/w*W));kan.width=W;kan.height=H;kag.drawImage(KZ.src,0,0,W,H);
+  const d=kag.getImageData(0,0,W,H).data,L=new Float32Array(W*H*3);for(let i=0,j=0;i<d.length;i+=4,j+=3){const o=lab(LIN[d[i]],LIN[d[i+1]],LIN[d[i+2]]);L[j]=o[0];L[j+1]=o[1];L[j+2]=o[2]}
+  KZ.W=W;KZ.H=H;KZ.L=L;return true}
+function kLearn(b){
+  const{W,L}=KZ,x0=Math.round(Math.min(b.x0,b.x1)),x1=Math.round(Math.max(b.x0,b.x1)),y0=Math.round(Math.min(b.y0,b.y1)),y1=Math.round(Math.max(b.y0,b.y1));
+  const cx0=x0+(x1-x0)/4|0,cx1=x1-(x1-x0)/4|0,cy0=y0+(y1-y0)/4|0,cy1=y1-(y1-y0)/4|0;let n=0,sL=0,sa=0,sb=0;
+  for(let y=cy0;y<=cy1;y++)for(let x=cx0;x<=cx1;x++){const j=(y*W+x)*3;sL+=L[j];sa+=L[j+1];sb+=L[j+2];n++}
+  if(!n)return;const m={L:sL/n,a:sa/n,b:sb/n};let v=0;
+  for(let y=cy0;y<=cy1;y++)for(let x=cx0;x<=cx1;x++){const j=(y*W+x)*3;v+=0.25*(L[j]-m.L)**2+(L[j+1]-m.a)**2+(L[j+2]-m.b)**2}
+  m.tol=Math.max(10,Math.min(45,2.5*Math.sqrt(v/n)+8));m.name=KZ.model&&KZ.model.name||'';KZ.model=m;KZ.refA=0;KZ.ex=[];KZ.add=[];
+  const r=kSeg(true);let best=null;for(const bl of r.all){const ox=Math.min(bl.x1,x1)-Math.max(bl.x0,x0),oy=Math.min(bl.y1,y1)-Math.max(bl.y0,y0);if(ox>0&&oy>0&&(!best||bl.area>best.area))best=bl}
+  KZ.refA=best?best.area:0;
+}
+function kSeg(raw){
+  const{W,H,L}=KZ,m=KZ.model,t=m.tol*(+$('#kTol').value/5),t2=t*t,N=W*H,mk=new Uint8Array(N),er=new Uint8Array(N),dl=new Uint8Array(N);
+  for(let j=0,k=0;j<N;j++,k+=3){const dL=L[k]-m.L,da=L[k+1]-m.a,db=L[k+2]-m.b;if(0.25*dL*dL+da*da+db*db<t2)mk[j]=1}
+  for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){const j=y*W+x;er[j]=mk[j]&mk[j-1]&mk[j+1]&mk[j-W]&mk[j+W]}
+  for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){const j=y*W+x;dl[j]=er[j]|er[j-1]|er[j+1]|er[j-W]|er[j+W]}
+  const lb=new Int32Array(N),all=[],st=[];let id=0;
+  for(let s=0;s<N;s++){if(!dl[s]||lb[s])continue;id++;let area=0,x0=W,y0=H,x1=0,y1=0;st.push(s);lb[s]=id;
+    while(st.length){const p=st.pop(),x=p%W,y=p/W|0;area++;if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y;
+      for(const q of[p-1,p+1,p-W,p+W]){if(q<0||q>=N||lb[q]||!dl[q])continue;if((q===p-1&&x===0)||(q===p+1&&x===W-1))continue;lb[q]=id;st.push(q)}}
+    if(area>=6)all.push({area,x0,y0,x1:x1+1,y1:y1+1})}
+  if(raw)return{all};
+  const ar=all.map(b=>b.area).sort((a,b)=>a-b),med=ar.length?ar[ar.length>>1]:0,U=KZ.refA||med||1;
+  const blobs=all.filter(b=>b.area>=0.3*U).map(b=>({...b,n:b.area>1.6*U?Math.round(b.area/U):1}));
+  for(const b of blobs)b.off=KZ.ex.some(p=>p.x>=b.x0&&p.x<=b.x1&&p.y>=b.y0&&p.y<=b.y1);
+  const total=blobs.reduce((s,b)=>s+(b.off?0:b.n),0)+KZ.add.length;
+  return{blobs,total};
+}
+function kDraw(){
+  const[w,h]=kDim();if(!w)return;const cw=kcv.clientWidth||300,ch=Math.round(cw*h/w),dp=devicePixelRatio||1;
+  if(kcv.width!==Math.round(cw*dp)||kcv.height!==Math.round(ch*dp)){kcv.width=cw*dp;kcv.height=ch*dp;kcv.style.height=ch+'px'}
+  const g=kctx;g.setTransform(dp,0,0,dp,0,0);g.drawImage(KZ.src,0,0,cw,ch);const sx=cw/(KZ.W||1),sy=ch/(KZ.H||1);
+  if(KZ.res){let i=0;g.font='700 14px Barlow,sans-serif';g.textAlign='center';g.textBaseline='middle';
+    for(const b of KZ.res.blobs){const x=b.x0*sx,y=b.y0*sy,bw=(b.x1-b.x0)*sx,bh=(b.y1-b.y0)*sy;
+      if(b.off){g.strokeStyle='#999';g.setLineDash([4,3]);g.lineWidth=2;g.strokeRect(x,y,bw,bh);g.setLineDash([]);g.fillStyle='#999';g.fillText('✕',x+bw/2,y+bh/2);continue}
+      i+=b.n;g.strokeStyle='#000a';g.lineWidth=5;g.strokeRect(x,y,bw,bh);g.strokeStyle=COL.mes;g.lineWidth=2.5;g.strokeRect(x,y,bw,bh);
+      const lab2=b.n>1?`${i-b.n+1}–${i}`:String(i),tw=g.measureText(lab2).width+10;g.fillStyle=COL.mes;g.fillRect(x,y-18<0?y:y-18,tw,18);g.fillStyle='#fff';g.fillText(lab2,x+tw/2,(y-18<0?y:y-18)+9)}
+    for(const p of KZ.add){const x=p.x*sx,y=p.y*sy;g.fillStyle=COL.ref;g.beginPath();g.arc(x,y,11,0,7);g.fill();g.fillStyle='#10232a';g.fillText('+',x,y+1)}}
+  if(KZ.drag){const d=KZ.drag;g.strokeStyle=COL.ref;g.lineWidth=3;g.setLineDash([8,5]);g.strokeRect(d.x0*sx,d.y0*sy,(d.x1-d.x0)*sx,(d.y1-d.y0)*sy);g.setLineDash([])}
+}
+function kHint(){$('#kHint').textContent=!KZ.src?'Ouvre une photo, une vidéo ou la caméra.':KZ.mode==='learn'?'👉 Entoure UN objet exemple avec le doigt.':'Touche un cadre pour l\'exclure, ou un endroit vide pour ajouter un objet.'}
+function kTick(){
+  if(!KZ.src)return;if(kGrab()&&KZ.model&&KZ.mode==='count'){KZ.res=kSeg();const n=KZ.res.total;if(KZ.kind!=='img')KZ.max=Math.max(KZ.max,n);
+    const nm=KZ.model.name||'objet';$('#kN').textContent=n+' '+(n>1?(KZ.model.name||'objets'):nm);
+    $('#kInfo').textContent=(KZ.kind!=='img'?`Maximum vu : ${KZ.max} · `:'')+(KZ.add.length?`dont ${KZ.add.length} ajouté(s) à la main`:'Comptage automatique');
+    const now=Date.now();if(n!==KZ.lastN){KZ.lastN=n;KZ.sT=now}else if(now-KZ.sT>900&&KZ.said!==n){KZ.said=n;say(n+' '+(n>1?(KZ.model.name||'objets'):nm));if(A11Y.deaf&&navigator.vibrate&&n<=20)navigator.vibrate(Array.from({length:n*2-1},(_,i)=>i%2?150:120))}}
+  else if(!KZ.model||KZ.mode==='learn'){KZ.res=null;$('#kN').textContent='—';$('#kInfo').textContent=''}
+  kDraw();kHint();
+}
+function kLoop(){if(!KZ.run)return;kTick();setTimeout(()=>requestAnimationFrame(kLoop),180)}
+function kStopLive(){KZ.run=false;if(KZ.stream){KZ.stream.getTracks().forEach(t=>t.stop());KZ.stream=null}$('#kLive').textContent='Caméra en direct'}
+function kSetSrc(src,kind){kStopLive();KZ.src=src;KZ.kind=kind;KZ.ex=[];KZ.add=[];KZ.max=0;KZ.refA=0;KZ.lastN=KZ.said=-1;KZ.mode=KZ.model?'count':'learn';
+  if(kind!=='vid')$('#kVid').hidden=true;if(kind==='img')kTick();else{KZ.run=true;kLoop()}}
+function kOpen(f){if(!f)return;const u=URL.createObjectURL(f);
+  if(f.type.startsWith('video')){const v=$('#kVid');v.srcObject=null;v.src=u;v.hidden=false;v.onloadeddata=()=>kSetSrc(v,'vid')}
+  else{const i=new Image();i.onload=()=>kSetSrc(i,'img');i.src=u}}
+$('#kCam1').onchange=e=>kOpen(e.target.files[0]);$('#kFile').onchange=e=>kOpen(e.target.files[0]);
+$('#kLive').onclick=async()=>{if(KZ.run&&KZ.kind==='cam'){kStopLive();return}
+  try{const st=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false});const v=$('#kVid');v.removeAttribute('src');v.srcObject=st;await v.play();v.hidden=true;
+    kSetSrc(v,'cam');KZ.stream=st;$('#kLive').textContent='Arrêter la caméra'}
+  catch(e){$('#kHint').textContent='Caméra bloquée ici. Utilise une photo, ou l\'APK.'}};
+const kPt=e=>{const r=kcv.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*KZ.W,y:(e.clientY-r.top)/r.height*KZ.H}};
+kcv.addEventListener('pointerdown',e=>{if(!KZ.src)return;kcv.setPointerCapture(e.pointerId);const p=kPt(e);
+  if(KZ.mode==='learn'){KZ.drag={x0:p.x,y0:p.y,x1:p.x,y1:p.y};kDraw();return}
+  const b=KZ.res&&KZ.res.blobs.find(b=>p.x>=b.x0&&p.x<=b.x1&&p.y>=b.y0&&p.y<=b.y1);
+  if(b){const i=KZ.ex.findIndex(q=>q.x>=b.x0&&q.x<=b.x1&&q.y>=b.y0&&q.y<=b.y1);if(i>=0)KZ.ex.splice(i,1);else KZ.ex.push({x:(b.x0+b.x1)/2,y:(b.y0+b.y1)/2})}
+  else{const i=KZ.add.findIndex(q=>Math.hypot(q.x-p.x,q.y-p.y)<5);if(i>=0)KZ.add.splice(i,1);else KZ.add.push(p)}
+  kTick()});
+kcv.addEventListener('pointermove',e=>{if(!KZ.drag)return;const p=kPt(e);KZ.drag.x1=p.x;KZ.drag.y1=p.y;kDraw()});
+const kUp=()=>{if(!KZ.drag)return;const d=KZ.drag;KZ.drag=null;if(Math.abs(d.x1-d.x0)<3||Math.abs(d.y1-d.y0)<3){kDraw();return}
+  kGrab();kLearn(d);KZ.mode='count';kTick()};
+kcv.addEventListener('pointerup',kUp);kcv.addEventListener('pointercancel',kUp);
+$('#kNew').onclick=()=>{KZ.mode='learn';KZ.res=null;kTick()};
+$('#kReset').onclick=()=>{KZ.ex=[];KZ.add=[];kTick()};
+$('#kTol').oninput=()=>{if(KZ.kind==='img')kTick()};
+function kList(){$('#kList').innerHTML=KM.length?KM.map((m,i)=>`<span class="kchip"><button data-i="${i}" class="${KZ.model&&KZ.model.name===m.name?'on':''}">${m.name.replace(/</g,'&lt;')}</button><button data-d="${i}" aria-label="Supprimer ${m.name.replace(/"/g,'')}">✕</button></span>`).join(''):'<small>Aucun type enregistré.</small>'}
+$('#kList').onclick=e=>{const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.d!=null){KM.splice(+b.dataset.d,1)}else{const m=KM[+b.dataset.i];KZ.model={...m};KZ.refA=0;KZ.mode='count';KZ.ex=[];KZ.add=[];kTick()}
+  try{localStorage.setItem('faito-models',JSON.stringify(KM))}catch(er){}kList()};
+$('#kSave').onclick=()=>{if(!KZ.model){$('#kHint').textContent='Entoure d\'abord un exemple.';return}const name=$('#kName').value.trim()||('Objet '+(KM.length+1));
+  KZ.model.name=name;const i=KM.findIndex(m=>m.name===name),m={name,L:KZ.model.L,a:KZ.model.a,b:KZ.model.b,tol:KZ.model.tol};if(i>=0)KM[i]=m;else KM.push(m);
+  try{localStorage.setItem('faito-models',JSON.stringify(KM))}catch(e){}kList();kTick();say('Type '+name+' enregistré')};
+new ResizeObserver(()=>{if(!$('#kbox').hidden)kDraw()}).observe(kcv);
+/* Exemple au démarrage : des oranges sur une table */
+{const c=document.createElement('canvas');c.width=640;c.height=420;const g=c.getContext('2d');g.fillStyle='#2f6f78';g.fillRect(0,0,640,420);g.fillStyle='#285f67';for(let y=0;y<420;y+=40)g.fillRect(0,y,640,3);
+ const P=[[90,90],[200,110],[320,80],[450,120],[560,90],[130,240],[270,250],[332,262],[480,230],[580,300],[200,350],[400,350]];
+ for(const[x,y]of P){const gr=g.createRadialGradient(x-10,y-10,4,x,y,34);gr.addColorStop(0,'#ffb347');gr.addColorStop(1,'#e8730c');g.fillStyle=gr;g.beginPath();g.arc(x,y,32,0,7);g.fill();g.fillStyle='#3d7a2a';g.beginPath();g.ellipse(x+4,y-30,8,4,0.5,0,7);g.fill()}
+ g.fillStyle='#6aa84f';for(const[x,y]of[[40,380],[600,40],[520,380]]){g.beginPath();g.ellipse(x,y,30,12,0.6,0,7);g.fill()}
+ KZ.src=c;KZ.kind='img';kGrab();kLearn({x0:90*240/640-13,y0:90*240/640-13,x1:90*240/640+13,y1:90*240/640+13});KZ.model.name='oranges';KZ.mode='count';
+ KZ.res=kSeg();$('#kN').textContent=KZ.res.total+' oranges';$('#kInfo').textContent='Exemple : une orange entourée, les autres comptées';kHint();kList()}
+
+/* ---- Assistant feux : rouge / orange / freinage devant (jamais de « vert ») ---- */
+const FZ={run:false,stream:null,hist:[],ema:0,bk:0,last:{},wake:null,clr:0,res:null};
+const fcv=document.createElement('canvas'),fg=fcv.getContext('2d',{willReadFrequently:true});
+function fBlobs(mask,W,H){const N=W*H,lb=new Uint8Array(N),out=[],st=[];
+  for(let s=0;s<N;s++){if(!mask[s]||lb[s])continue;let a=0,x0=W,y0=H,x1=0,y1=0;st.push(s);lb[s]=1;
+    while(st.length){const p=st.pop(),x=p%W,y=p/W|0;a++;if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y;
+      for(const q of[p-1,p+1,p-W,p+W])if(q>=0&&q<N&&!lb[q]&&mask[q]&&!((q===p-1&&x===0)||(q===p+1&&x===W-1))){lb[q]=1;st.push(q)}}
+    const bw=x1-x0+1,bh=y1-y0+1;if(a>=2&&a<=N*0.02&&a/(bw*bh)>0.4&&bw/bh>0.4&&bw/bh<2.5)out.push({a,cx:(x0+x1)/2,cy:(y0+y1)/2,r:Math.max(bw,bh)/2})}
+  return out}
+function fDetect(src,w,h){
+  const W=160,H=Math.max(1,Math.round(h/w*W));fcv.width=W;fcv.height=H;fg.drawImage(src,0,0,W,H);const d=fg.getImageData(0,0,W,H).data,N=W*H,mr=new Uint8Array(N),ma=new Uint8Array(N);
+  for(let i=0,j=0;j<N;i+=4,j++){const r=d[i],g=d[i+1],b=d[i+2],mx=Math.max(r,g,b),mn=Math.min(r,g,b);if(mx<190||(mx-mn)/mx<0.5)continue;
+    let hh=mx===r?((g-b)/(mx-mn))%6:mx===g?(b-r)/(mx-mn)+2:(r-g)/(mx-mn)+4;hh=(hh*60+360)%360;if(hh<14||hh>340)mr[j]=1;else if(hh>=20&&hh<=48)ma[j]=1}
+  const red=fBlobs(mr,W,H),amb=fBlobs(ma,W,H),inPair=new Set();
+  for(let i=0;i<red.length;i++)for(let k=i+1;k<red.length;k++){const A=red[i],B=red[k],sz=Math.max(A.r,B.r,1);if(Math.abs(A.cy-B.cy)<Math.max(2,1.5*sz)&&Math.abs(A.cx-B.cx)>3*sz){inPair.add(A);inPair.add(B)}}
+  return{W,H,red,amb,tl:red.filter(b=>!inPair.has(b)&&b.cy<0.6*H),ta:amb.filter(b=>b.cy<0.6*H),pairs:[...inPair],area:[...inPair].reduce((s,b)=>s+b.a,0)};
+}
+function fAlert(k,msg,lv){const b=$('#fBanner');b.className='al';b.style.background=COL.lv[lv];b.textContent=msg;FZ.clr=Date.now();
+  const now=Date.now();if(!FZ.last[k]||now-FZ.last[k]>4000){FZ.last[k]=now;say(msg,true);navigator.vibrate&&navigator.vibrate([300,100,300])}}
+function fStep(src,w,h){
+  const r=fDetect(src,w,h);FZ.res=r;FZ.hist.push({r:r.tl.length>0,a:r.ta.length>0});if(FZ.hist.length>5)FZ.hist.shift();
+  const brake=r.pairs.length&&r.area>Math.max(6,FZ.ema*1.6);FZ.bk=brake?FZ.bk+1:0;FZ.ema+=(brake?0.02:0.1)*(r.area-FZ.ema);
+  const nr=FZ.hist.filter(x=>x.r).length,na=FZ.hist.filter(x=>x.a).length;
+  if(FZ.bk>=2)fAlert('frein','Freinage devant',0);else if(nr>=3)fAlert('rouge','Attention, feu rouge',0);else if(na>=3)fAlert('orange','Attention, feu orange',1);
+  else if(Date.now()-FZ.clr>1500){const b=$('#fBanner');b.className='';b.style.background='';b.textContent='Rien à signaler'}
+  return r;
+}
+function fDraw(){const o=$('#fOv'),r=FZ.res;if(!r)return;const W=o.clientWidth,H=o.clientHeight,dp=devicePixelRatio||1;o.width=W*dp;o.height=H*dp;const g=o.getContext('2d');g.setTransform(dp,0,0,dp,0,0);
+  const sx=W/r.W,sy=H/r.H;g.lineWidth=3;for(const[list,c]of[[r.tl,'#fff'],[r.ta,'#ffd400'],[r.pairs,'#ff4d4d']])for(const b of list){g.strokeStyle=c;g.beginPath();g.arc(b.cx*sx,b.cy*sy,Math.max(8,b.r*sx+5),0,7);g.stroke()}}
+function fLoop(){if(!FZ.run)return;const v=$('#fVid');if(v.videoWidth){fStep(v,v.videoWidth,v.videoHeight);fDraw()}setTimeout(()=>requestAnimationFrame(fLoop),90)}
+async function fStart(){
+  try{FZ.stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}},audio:false});const v=$('#fVid');v.srcObject=FZ.stream;await v.play();
+    $('#fStage').hidden=false;FZ.run=true;FZ.hist=[];FZ.ema=0;FZ.bk=0;$('#fGo').textContent='Arrêter l\'assistant';$('#fBanner').textContent='Rien à signaler';say('Assistant feux démarré. Garde les yeux sur la route.',true);
+    try{FZ.wake=await navigator.wakeLock.request('screen')}catch(e){}fLoop()}
+  catch(e){$('#fBanner').textContent='Caméra bloquée ici : utilise l\'APK.'}
+}
+function fStop(){FZ.run=false;FZ.stream&&FZ.stream.getTracks().forEach(t=>t.stop());FZ.stream=null;try{FZ.wake&&FZ.wake.release()}catch(e){}FZ.wake=null;
+  $('#fStage').hidden=true;$('#fGo').textContent='Démarrer l\'assistant';const b=$('#fBanner');b.className='';b.style.background='';b.textContent='Assistant arrêté'}
+$('#fOk').onchange=e=>{$('#fGo').disabled=!e.target.checked;if(!e.target.checked&&FZ.run)fStop()};
+$('#fGo').onclick=()=>FZ.run?fStop():fStart();
 
 /* ---- Morse + mode sourd : vibrations, flashs, lampe torche ---- */
 const MO={A:'.-',B:'-...',C:'-.-.',D:'-..',E:'.',F:'..-.',G:'--.',H:'....',I:'..',J:'.---',K:'-.-',L:'.-..',M:'--',N:'-.',O:'---',P:'.--.',Q:'--.-',R:'.-.',S:'...',T:'-',U:'..-',V:'...-',W:'.--',X:'-..-',Y:'-.--',Z:'--..',0:'-----',1:'.----',2:'..---',3:'...--',4:'....-',5:'.....',6:'-....',7:'--...',8:'---..',9:'----.','.':'.-.-.-',',':'--..--','?':'..--..','!':'-.-.--',"'":'.----.','-':'-....-','/':'-..-.','@':'.--.-.'};
@@ -816,13 +1046,16 @@ img=sample();ref={a:{x:415,y:150},b:{x:415,y:760}};lines=[{a:{x:620,y:465},b:{x:
 VW.side={img:sampleSide(),ref:{a:{x:415,y:150},b:{x:415,y:760}},lines:[{a:{x:640,y:465},b:{x:849,y:465}}],mode:'mes',rl:'204'};
 fit();
 /* ---- Menu : chaque outil dans son onglet ---- */
-{const TABS={wbox:'poids',sbox:'sonar',rbox:'radar',lbox:'laser',cbox:'couleur',mbox:'morse'};
+{const TABS={wbox:'poids',sbox:'sonar',rbox:'radar',lbox:'laser',cbox:'couleur',mbox:'morse',kbox:'compter',fbox:'couleur'};
  for(const el of document.querySelector('main').children){if(el.classList.contains('top')||el.classList.contains('motif'))continue;el.dataset.tab=TABS[el.id]||'mesure'}
  let tab='mesure';
  function goTab(t){
    if(tab==='radar'&&t!=='radar'&&(RD.radar||RD.alert)){RD.radar=RD.alert=false;rBtns()}
    if(tab==='laser'&&t!=='laser'&&LZ.run)$('#lCam').click();
    if(tab==='couleur'&&t!=='couleur'&&CZ.run)cStop();
+   if(tab==='couleur'&&t!=='couleur'&&FZ.run)fStop();
+   if(tab==='compter'&&t!=='compter'&&KZ.kind==='cam')kStopLive();
+   if(t==='compter')requestAnimationFrame(kDraw);
    tab=t;document.querySelectorAll('[data-tab]').forEach(el=>el.hidden=el.dataset.tab!==t);
    document.querySelectorAll('#nav button').forEach(b=>{b.classList.toggle('on',b.dataset.t===t);b.setAttribute('aria-current',b.dataset.t===t?'page':'false')});
    $('.sub').hidden=t!=='mesure';scrollTo(0,0);
