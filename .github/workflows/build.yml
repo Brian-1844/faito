@@ -54,11 +54,35 @@ jobs:
       - name: Synchroniser
         run: npx cap sync android
 
-      - name: Compiler l'APK
+      - name: Cache Gradle (moins de téléchargements)
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-v1
+
+      - name: Miroir Maven (évite l'erreur 429 Too Many Requests)
+        run: |
+          mkdir -p ~/.gradle/init.d
+          cat > ~/.gradle/init.d/miroir.gradle <<'EOF'
+          def miroir = 'https://maven-central.storage-download.googleapis.com/maven2/'
+          allprojects {
+            buildscript { repositories { maven { url miroir } } }
+            repositories { maven { url miroir } }
+          }
+          EOF
+
+      - name: Compiler l'APK (3 essais si le serveur sature)
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleRelease --no-daemon
+          for i in 1 2 3; do
+            ./gradlew assembleRelease --no-daemon && exit 0
+            echo "Essai $i échoué, nouvelle tentative dans 60 s…"
+            sleep 60
+          done
+          exit 1
 
       - name: Signer l'APK (toujours la même clé, sinon la mise à jour est refusée)
         env:
