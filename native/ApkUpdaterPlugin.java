@@ -8,7 +8,12 @@ import android.provider.Settings;
 
 import androidx.core.content.FileProvider;
 
+import android.app.Activity;
+import androidx.activity.result.ActivityResult;
+import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
+import com.getcapacitor.annotation.ActivityCallback;
+import com.google.ar.core.ArCoreApk;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
@@ -163,6 +168,33 @@ public class ApkUpdaterPlugin extends Plugin {
         if (sm != null && sl != null) sm.unregisterListener(sl);
         sl = null;
         call.resolve();
+    }
+
+    /** Mesure AR native (ARCore) : ouvre l'écran de mesure et renvoie les longueurs en cm. */
+    @PluginMethod
+    public void arMeasure(PluginCall call) {
+        try {
+            ArCoreApk.Availability a = ArCoreApk.getInstance().checkAvailability(getContext());
+            if (a.isUnsupported()) { call.reject("Ce téléphone n'est pas compatible ARCore"); return; }
+        } catch (Exception e) { /* on tente quand même */ }
+        Intent i = new Intent(getContext(), ArMeasureActivity.class);
+        startActivityForResult(call, i, "arDone");
+    }
+
+    @ActivityCallback
+    private void arDone(PluginCall call, ActivityResult result) {
+        if (call == null) return;
+        Intent d = result.getData();
+        if (result.getResultCode() != Activity.RESULT_OK) {
+            String err = d != null ? d.getStringExtra("erreur") : null;
+            if (err != null) { call.reject(err); return; }
+        }
+        JSArray arr = new JSArray();
+        float[] m = d != null ? d.getFloatArrayExtra("mesures") : null;
+        if (m != null) for (float f : m) { try { arr.put((double) f); } catch (Exception e) { /* valeur ignorée */ } }
+        JSObject o = new JSObject();
+        o.put("mesures", arr);
+        call.resolve(o);
     }
 
     /** Ouvre une adresse dans Chrome (utile pour le mode AR / WebXR). */

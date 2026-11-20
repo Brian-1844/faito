@@ -40,6 +40,7 @@ button.pri{background:var(--lag);color:#fff;border-color:var(--lag)}
 #list{list-style:none;padding:0;margin:8px 0;display:grid;gap:6px}
 #list li{display:flex;justify-content:space-between;align-items:center;background:var(--card);border-radius:10px;padding:6px 12px;border-left:6px solid var(--lag)}
 #list b{font:700 22px "Barlow Condensed";white-space:nowrap}
+#arList{list-style:none;padding:0;margin:8px 0;display:grid;gap:6px}#arList li{display:flex;justify-content:space-between;align-items:center;background:var(--card);border-radius:10px;padding:6px 12px;border-left:6px solid #E69F00}#arList b{font:700 22px "Barlow Condensed";white-space:nowrap}
 #note{min-height:1.4em;color:var(--mut);font-size:15px}
 #vidwrap{display:none;margin:12px 0}#vidwrap video{width:100%;max-height:50vh;border-radius:14px;background:#000}
 details{margin-top:18px;background:var(--card);border-radius:14px;padding:10px 14px}
@@ -251,6 +252,7 @@ h1{cursor:pointer}
   </div>
 
   <ul id="list"></ul>
+  <ul id="arList" class="arl" hidden></ul>
 
   <section class="wbox" id="wbox">
     <h2>Poids estimé</h2>
@@ -632,10 +634,17 @@ $('#live').onclick=async()=>{
 };
 addEventListener('resize',fit);new ResizeObserver(fit).observe(fig);
 
+const ARM=[];
+function arList(){const L=$('#arList');L.hidden=!ARM.length;L.innerHTML=ARM.map((v,i)=>`<li><span>Mesure AR ${i+1}</span><b>${fmt(v)}</b></li>`).join('')+(ARM.length?'<li><button id="arClr" class="chip">Effacer les mesures AR</button></li>':'');const c=$('#arClr');if(c)c.onclick=()=>{ARM.length=0;arList()}}
 /* ---- Mode AR live (WebXR + ARCore) ---- */
 const mul=(M,v)=>[0,1,2,3].map(i=>M[i]*v[0]+M[4+i]*v[1]+M[8+i]*v[2]+M[12+i]*v[3]);
 $('#ar').onclick=async()=>{
-  if(NATIVE){try{await UP.openExternal({url:(window.APP&&APP.pages||'')+'#ar'});note('L\'AR s\'ouvre dans Chrome (la vue intégrée de l\'app ne gère pas l\'AR).')}catch(e){note('Impossible d\'ouvrir Chrome : '+e.message)}return}
+  if(NATIVE){
+    if(UP.arMeasure){try{note('Ouverture de la mesure AR…');const r=await UP.arMeasure();const m=(r&&r.mesures)||[];
+        if(!m.length){note('Mesure AR fermée sans mesure.');return}
+        ARM.push(...m);arList();note('Mesures AR : '+m.map(v=>fmt(v)).join(' · '));say('Mesure AR : '+m.map(v=>spk(v)).join(', '));if(A11Y.deaf)vibDist(m[m.length-1]);return}
+      catch(e){note('AR native indisponible ('+(e.message||e)+'). Ouverture dans Chrome…')}}
+    try{await UP.openExternal({url:(window.APP&&APP.pages||'')+'#ar'})}catch(e){note('Impossible d\'ouvrir Chrome : '+e.message)}return}
   let ok=false;try{ok=!!navigator.xr&&await navigator.xr.isSessionSupported('immersive-ar')}catch(e){}
   if(!ok)return note('AR non disponible ici. Il faut Chrome Android avec ARCore, sur la page publiée (GitHub Pages), pas dans l\'aperçu.');
   const ov=$('#arov'),c2=$('#arcv'),g2=c2.getContext('2d');let session;
