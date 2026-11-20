@@ -153,6 +153,14 @@ html.dalto{--tape:#E69F00;--lag:#0072B2}
 .mzbar{height:14px;border-radius:99px;background:var(--bg);overflow:hidden;border:1px solid var(--line);flex:1}
 .mzbar i{display:block;height:100%;width:0;background:#009E73}
 #mzDot{flex:none;width:22px;height:22px;border-radius:50%;background:#555;border:2px solid var(--line)}#mzDot.on{background:#F0E442;box-shadow:0 0 12px #F0E442}
+#nav{display:flex;overflow-x:auto;scrollbar-width:none;gap:0}#nav::-webkit-scrollbar{display:none}#nav button{flex:1 0 60px;font-size:10px}
+[hidden]{display:none!important}
+.vbox{border-left-color:#56B4E9}
+#vStage{position:relative;margin:8px 0;background:#000;border-radius:14px;overflow:hidden}#vStage[hidden]{display:none}
+#vVid{display:block;width:100%}#vOv{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+#vN{font:700 clamp(44px,12vw,64px)/1 "Barlow Condensed";white-space:nowrap;color:#0072B2}
+#vHist{list-style:none;padding:0;margin:6px 0;display:grid;gap:4px}#vHist li{background:var(--bg);border-radius:8px;padding:6px 10px;display:flex;justify-content:space-between}
+.vin{font:600 16px Barlow,sans-serif;min-height:44px;width:100px;padding:0 10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
 @media(prefers-reduced-motion:no-preference){.dot{transition:background .2s}}
 </style>
 </head>
@@ -184,6 +192,14 @@ html.dalto{--tape:#E69F00;--lag:#0072B2}
       <span id="refinfo" class="sub" style="margin:0"></span>
     </div>
     <div class="row" id="presets"></div>
+  </div>
+
+  <div class="refbox" style="border-left-color:#8f7aa8">
+    <label for="snD">Sans repère : sonar + caméra</label>
+    <p class="sub" style="margin:0 0 8px">Photographie l'objet bien en face, puis, sans bouger, mesure la distance au sonar : l'app en déduit l'échelle de la photo, sans objet de référence.</p>
+    <div class="row" style="margin:0;align-items:center"><button id="snPing" class="pri">🔊 Distance au sonar</button><input id="snD" type="number" inputmode="decimal" min="1" placeholder="ou cm" aria-label="Distance jusqu'à l'objet en cm"><button id="snOff" aria-label="Désactiver l'échelle sonar">✕</button></div>
+    <div id="snInfo" class="sub" style="margin:8px 0 0"></div>
+    <div class="row" style="margin:6px 0 0"><button id="snCal" hidden>Calibrer la caméra avec le repère jaune</button></div>
   </div>
 
   <ul id="list"></ul>
@@ -262,6 +278,24 @@ html.dalto{--tape:#E69F00;--lag:#0072B2}
     <div class="row" id="kList"></div>
     <small>Marche le mieux avec des objets d'une couleur nette sur un fond différent : fruits, bouteilles, pièces, bouées… Les objets collés sont estimés d'après leur taille. Sur une vidéo, l'app compte l'image affichée et retient le maximum vu (elle ne suit pas chaque objet d'une image à l'autre).</small>
   </section>
+  <section class="sbox vbox" id="vbox">
+    <h2>Mesurer une vitesse</h2>
+    <p class="sub" style="margin:0">Filme un objet qui passe (voiture, coureur, vaʻa, ballon…) en direct ou depuis une vidéo. Tiens le téléphone immobile, de côté par rapport au mouvement.</p>
+    <div class="row"><button id="vCam" class="pri">Caméra en direct</button><label class="btn">Ouvrir une vidéo<input id="vFile" type="file" accept="video/*"></label></div>
+    <div class="row" id="vMeth"><button class="chip on" data-m="lines">Deux lignes (le plus fiable)</button><button class="chip" data-m="track">Suivre l'objet</button></div>
+    <p id="vHint" style="font-weight:600;margin:6px 0"></p>
+    <div id="vStage" hidden><video id="vVid" playsinline muted></video><canvas id="vOv" aria-label="Vidéo analysée"></canvas></div>
+    <div id="vLinesOpt" class="row" style="align-items:center"><label for="vDist" style="font-weight:600">Distance réelle entre les 2 lignes</label><input id="vDist" class="vin" type="number" inputmode="decimal" min="0.1" step="0.1" value="10"> m</div>
+    <div id="vTrackOpt" hidden>
+      <div class="row" style="align-items:center"><label for="vScale" style="font-weight:600">Échelle</label><select id="vScale" class="wsel"><option value="dist">Distance jusqu'à l'objet</option><option value="ref">Objet de référence dans l'image</option></select></div>
+      <div class="row" style="align-items:center" id="vDistRow"><label for="vD" style="font-weight:600">Distance jusqu'à l'objet</label><input id="vD" class="vin" type="number" inputmode="decimal" min="0.3" step="0.1" value="10"> m</div>
+      <div class="row" style="align-items:center" id="vRefRow" hidden><button id="vRefBtn">📏 Tracer le repère</button><label for="vRefL" style="font-weight:600">Longueur réelle</label><input id="vRefL" class="vin" type="number" inputmode="decimal" min="0.05" step="0.05" value="4.2"> m</div>
+    </div>
+    <div class="row" style="align-items:center"><label for="vSlow" style="font-weight:600">Vidéo au ralenti ×</label><input id="vSlow" class="vin" type="number" inputmode="decimal" min="1" step="1" value="1"><button id="vReset">Recommencer</button></div>
+    <div class="sres"><b id="vN" aria-live="polite">—</b><span id="vInfo"></span></div>
+    <ul id="vHist"></ul>
+    <small>Deux lignes : mesure au sol la distance entre deux repères (poteaux, marquages…), place une ligne sur chacun, et l'app chronomètre le passage. Suivre l'objet : touche l'objet ; l'échelle vient soit de sa distance, soit d'un objet de référence tracé dans l'image (une voiture fait environ 4,2 m), placé à la même distance que le trajet. Le mouvement doit être de côté par rapport à la caméra (±20 % environ). Pour une vidéo au ralenti, indique le facteur (×4, ×8).</small>
+  </section>
   <section class="sbox mbox" id="mbox">
     <h2>Morse : messages par vibrations</h2>
     <p class="sub" style="margin:0">Écris un message : le téléphone le transmet en vibrations, en flashs d'écran ou avec la lampe torche. Pour les personnes sourdes ou sourdes-aveugles, et pour communiquer en silence.</p>
@@ -329,6 +363,7 @@ html.dalto{--tape:#E69F00;--lag:#0072B2}
   <button data-t="laser"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="9" width="9" height="6" rx="1.5"/><path d="M11 12h8" stroke-dasharray="2 2"/><circle cx="21" cy="12" r="1.6" fill="currentColor"/></svg>Laser</button>
   <button data-t="couleur"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a9 9 0 1 0 0 18c1.5 0 2-1 2-2s-1-1.5-1-2.5 1-1.5 2-1.5h2a4 4 0 0 0 4-4c0-4.5-4-8-9-8z"/><circle cx="7.5" cy="11" r="1.3" fill="currentColor"/><circle cx="10" cy="7" r="1.3" fill="currentColor"/><circle cx="15" cy="7.5" r="1.3" fill="currentColor"/></svg>Couleur</button>
   <button data-t="compter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M17.5 14v7M14 17.5h7" stroke-linecap="round"/></svg>Compter</button>
+  <button data-t="vitesse"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 17a8 8 0 1 1 16 0"/><path d="M12 17l4.5-5"/><circle cx="12" cy="17" r="1.4" fill="currentColor"/></svg>Vitesse</button>
   <button data-t="morse"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="4" cy="12" r="1.5" fill="currentColor"/><path d="M9 12h5"/><circle cx="19" cy="12" r="1.5" fill="currentColor"/><path d="M3 6h3M9 6h8M3 18h8M15 18h6" stroke-width="1.6" opacity=".5"/></svg>Morse</button>
 </nav>
 <div id="flash" aria-hidden="true"></div>
@@ -381,11 +416,11 @@ const UP=NATIVE?((CAP.Plugins&&CAP.Plugins.ApkUpdater)||(CAP.registerPlugin&&CAP
 const PRE=[['Porte',204],['A4 long',29.7],['A4 court',21],['Carte bancaire',8.56],['Marche',17],['1 m',100]];
 let img=null,ref=null,lines=[],mode='ref',drag=null,s=1,dpr=1,loupe=null;
 let cur='face';const VW={face:null,side:null};
-function saveV(){VW[cur]={img,ref,lines,mode,rl:$('#reflen').value}}
-function loadV(k){const o=VW[k];cur=k;if(o){img=o.img;ref=o.ref;lines=o.lines;mode=o.mode;$('#reflen').value=o.rl}else{img=blank();ref=null;lines=[];mode='ref'}
+function saveV(){VW[cur]={img,ref,lines,mode,rl:$('#reflen').value,son:{...SON}}}
+function loadV(k){const o=VW[k];cur=k;if(o){img=o.img;ref=o.ref;lines=o.lines;mode=o.mode;$('#reflen').value=o.rl;Object.assign(SON,o.son||{d:null,use:false})}else{img=blank();ref=null;lines=[];mode='ref';Object.assign(SON,{d:null,use:false})}$('#snD').value=SON.d?Math.round(SON.d):'';
   document.querySelectorAll('#views button').forEach(b=>b.classList.toggle('on',b.dataset.v===k));fit()}
 function blank(){const c=document.createElement('canvas');c.width=1200;c.height=900;const g=c.getContext('2d');g.fillStyle='#12303a';g.fillRect(0,0,1200,900);g.fillStyle='#9fbcc3';g.textAlign='center';g.font='600 48px sans-serif';g.fillText('Ajoute la photo de côté',600,430);g.font='34px sans-serif';g.fillText('même objet, vu de profil',600,495);return c}
-function cmAt(src){const[k,j]=src.split(':'),i=+j;if(k===cur)return lines[i]?cmOf(lines[i]):null;const o=VW[k];if(!o||!o.ref||!o.lines[i])return null;const rp=len(o.ref);return rp>0?len(o.lines[i])*(+o.rl||0)/rp:null}
+function cmAt(src){const[k,j]=src.split(':'),i=+j;if(k===cur)return lines[i]?cmOf(lines[i]):null;const o=VW[k];if(!o||!o.lines[i])return null;if(o.son&&o.son.use&&o.son.d){const W=Math.max(o.img.width||0,o.img.height||0);if(W)return len(o.lines[i])*2*o.son.d*TANH/W}if(!o.ref)return null;const rp=len(o.ref);return rp>0?len(o.lines[i])*(+o.rl||0)/rp:null}
 function allM(){const out=[];for(const k of['face','side']){const n=k===cur?lines.length:(VW[k]?VW[k].lines.length:0);for(let i=0;i<n;i++)out.push(k+':'+i)}return out}
 function sampleSide(){
   const c=document.createElement('canvas');c.width=1200;c.height=900;const g=c.getContext('2d');
@@ -398,7 +433,9 @@ function sampleSide(){
 }
 const fmt=cm=>cm>=100?(cm/100).toFixed(2).replace('.',',')+' m':cm.toFixed(1).replace('.',',')+' cm';
 const len=l=>Math.hypot(l.b.x-l.a.x,l.b.y-l.a.y);
-const cmOf=l=>ref&&len(ref)>0?len(l)*(+$('#reflen').value||0)/len(ref):null;
+const SON={d:null,use:false};let TANH=0.6494,TCAL=false;try{const tt=JSON.parse(localStorage.getItem('faito-fov')||'null');if(tt){TANH=tt.t;TCAL=true}}catch(e){}
+const scNow=()=>{if(!SON.d||!img)return null;const W=Math.max(img.width||img.videoWidth||0,img.height||img.videoHeight||0);return W?2*SON.d*TANH/W:null};
+const cmOf=l=>{if(SON.use&&SON.d){const sc=scNow();if(sc)return len(l)*sc}return ref&&len(ref)>0?len(l)*(+$('#reflen').value||0)/len(ref):null};
 const note=t=>$('#note').textContent=t;
 
 function sample(){
@@ -447,7 +484,9 @@ function ui(){
   $('#mRef').classList.toggle('on',mode==='ref');$('#mMes').classList.toggle('on',mode==='mes');
   $('#dot').textContent=mode==='ref'?'1':'2';$('#dot').classList.toggle('m',mode==='mes');
   $('#steptxt').textContent=mode==='ref'?'Glisse le doigt le long d\'un objet de taille connue':'Glisse le doigt pour mesurer. Touche un point pour l\'ajuster.';
-  $('#refinfo').textContent=ref?'':'aucun repère tracé';
+  $('#refinfo').textContent=SON.use&&SON.d?'échelle sonar utilisée':ref?'':'aucun repère tracé';
+  if(SON.use&&SON.d&&mode==='mes')$('#steptxt').textContent='Échelle sonar active : glisse le doigt pour mesurer.';
+  snUI();
   $('#list').innerHTML=lines.map((l,i)=>{const c=cmOf(l);return `<li><span>Mesure ${i+1}</span><b>${c==null?'—':fmt(c)}</b></li>`}).join('');
   wCalc();
 }
@@ -460,20 +499,20 @@ cv.addEventListener('pointerdown',e=>{
 cv.addEventListener('pointermove',e=>{if(!drag)return;const p=pt(e);drag.l[drag.k].x=p.x;drag.l[drag.k].y=p.y;loupe=p;draw()});
 const up=()=>{if(!drag)return;const l=drag.l;
   if(drag.isNew&&len(l)*s<10){if(l===ref)ref=null;else lines.pop()}
-  else if(drag.isNew&&l===ref){mode='mes';$('#reflen').focus({preventScroll:true});note('Repère posé. Vérifie sa taille réelle, puis mesure.')}
+  else if(drag.isNew&&l===ref){mode='mes';SON.use=false;$('#reflen').focus({preventScroll:true});note('Repère posé. Vérifie sa taille réelle, puis mesure.')}
   if(drag.isNew&&l!==ref&&lines.includes(l)){const c=cmOf(l);if(c!=null)say('Mesure '+lines.length+' : '+spk(c))}
   else if(drag.isNew&&l===ref)say('Repère posé. Indique sa taille réelle.');
   drag=null;loupe=null;draw()};
 cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
 
-$('#mRef').onclick=()=>{mode='ref';ui()};$('#mMes').onclick=()=>{if(!ref)return note('Trace d\'abord le repère jaune.');mode='mes';ui()};
+$('#mRef').onclick=()=>{mode='ref';ui()};$('#mMes').onclick=()=>{if(!ref&&!(SON.use&&SON.d))return note('Trace d\'abord le repère jaune.');mode='mes';ui()};
 $('#undo').onclick=()=>{if(lines.length)lines.pop();else{ref=null;mode='ref'}draw()};
 $('#clear').onclick=()=>{ref=null;lines=[];mode='ref';draw()};
 $('#reflen').oninput=draw;
 $('#presets').innerHTML=PRE.map(([n,v])=>`<button class="chip" data-v="${v}">${n} · ${String(v).replace('.',',')}</button>`).join('');
 $('#presets').onclick=e=>{const b=e.target.closest('button');if(!b)return;$('#reflen').value=b.dataset.v;draw()};
 
-function setImg(src){img=src;ref=null;lines=[];mode='ref';fit();fig.scrollIntoView({behavior:'smooth',block:'start'})}
+function setImg(src){img=src;ref=null;lines=[];mode=SON.use&&SON.d?'mes':'ref';if(SON.use&&SON.d)note('Échelle sonar appliquée ('+fmt(SON.d)+'). Refais le sonar si tu as bougé.');fit();fig.scrollIntoView({behavior:'smooth',block:'start'})}
 const vid=$('#vid');
 function openFile(f){
   if(!f)return;const u=URL.createObjectURL(f);
@@ -618,7 +657,7 @@ const STEPS=[
  {t:'2. Mesure en bleu',p:['Glisse le doigt d\'un bout à l\'autre de ce que tu veux mesurer. La loupe t\'aide à viser juste.','Touche un point pour l\'ajuster. Le repère et l\'objet doivent être à la même distance.'],s:`<path d="M30 150L150 70" stroke="#13a9b8" stroke-width="7" stroke-linecap="round"/><circle cx="30" cy="150" r="10" fill="#13a9b8"/><circle cx="150" cy="70" r="10" fill="#13a9b8"/><circle cx="150" cy="70" r="34" fill="none" stroke="#fff" stroke-width="5"/><path d="M174 94l16 16" stroke="#fff" stroke-width="8" stroke-linecap="round"/><rect x="56" y="104" width="62" height="26" rx="7" fill="#13a9b8"/><text x="87" y="123" fill="#fff" font-size="16" font-weight="700" text-anchor="middle" font-family="sans-serif">45 cm</text>`},
  {t:'3. Estime le poids',p:['Mesure l\'objet <b>de face</b>, puis ouvre <b>Vue de côté</b> pour sa profondeur.','Choisis la forme et la matière, et Fāito calcule le poids : volume × densité.'],s:TURTLE},
  {t:'4. Sonar',p:['Pas de photo ? Appuie sur <b>Bip</b> : le téléphone écoute l\'écho et donne la distance jusqu\'au mur.','Dans le noir, le <b>radar</b> dessine la pièce pendant que tu tournes sur toi-même.'],s:`${[40,70,100].map(r=>`<path d="M${60+r*0.2} ${100-r} A${r} ${r} 0 0 1 ${60+r*0.2} ${100+r}" fill="none" stroke="#8f7aa8" stroke-width="7" stroke-linecap="round" transform="translate(${r*0.6} 0)"/>`).join('')}<rect x="20" y="70" width="34" height="60" rx="8" fill="#13a9b8"/><rect x="170" y="30" width="12" height="140" fill="#ffc928"/>`},
- {t:'Mauruuru !',p:['Le bouton <b>accessibilité</b> en haut active le mode non-voyant (voix), daltonien ou sourd (vibrations).','Le <b>menu en bas</b> range les outils : Mesure, Poids, Sonar, Radar, Laser, Couleur, Compter et Morse.','Tu peux revoir ce tutoriel avec le bouton <b>?</b> en haut.'],s:SUN}
+ {t:'Mauruuru !',p:['Le bouton <b>accessibilité</b> en haut active le mode non-voyant (voix), daltonien ou sourd (vibrations).','Le <b>menu en bas</b> range les outils : Mesure, Poids, Sonar, Radar, Laser, Couleur, Compter, Vitesse et Morse.','Tu peux revoir ce tutoriel avec le bouton <b>?</b> en haut.'],s:SUN}
 ];
 let hs=0;const hello=$('#hello');
 function hShow(){const st=STEPS[hs];
@@ -633,6 +672,28 @@ $('#helpBtn').onclick=hOpen;
 let hx=null;hello.addEventListener('touchstart',e=>hx=e.touches[0].clientX,{passive:true});
 hello.addEventListener('touchend',e=>{if(hx==null)return;const dx=e.changedTouches[0].clientX-hx;hx=null;if(dx<-50)$('#hNext').click();else if(dx>50)$('#hPrev').click()});
 {let off=false;try{off=localStorage.getItem('faito-hello')==='off'}catch(e){};$('#hSkip').checked=off;if(!off)hOpen()}
+
+/* ---- Couplage sonar + caméra : échelle de la photo sans repère ---- */
+function snUI(){
+  $('#snInfo').textContent=SON.use&&SON.d?`Échelle sonar active · distance ${fmt(SON.d)} · ${TCAL?'caméra calibrée':'caméra non calibrée (±15 % environ)'}`:'Échelle sonar inactive : le repère jaune est utilisé.';
+  $('#snCal').hidden=!(ref&&SON.d);
+}
+$('#snPing').onclick=async()=>{
+  const b=$('#snPing');b.disabled=true;$('#snInfo').textContent='Bips en cours… ne bouge pas le téléphone.';
+  try{const res=[];for(let i=0;i<5;i++){const r=await ping();if(r.ok)res.push(r.m);await wait(100)}
+    if(!res.length){$('#snInfo').textContent='Pas d\'écho clair : rapproche-toi de l\'objet (40 cm à 5 m), ou saisis la distance.';say('Pas d\'écho clair')}
+    else{res.sort((a,b)=>a-b);SON.d=res[res.length>>1]*100;SON.use=true;$('#snD').value=Math.round(SON.d);if(img&&mode==='ref')mode='mes';draw();say('Distance : '+spk(SON.d)+'. Échelle appliquée.');if(A11Y.deaf)vibDist(SON.d)}}
+  catch(e){$('#snInfo').textContent=e.name==='NotAllowedError'||e.name==='SecurityError'?'Micro bloqué ici : utilise l\'APK, ou saisis la distance.':'Erreur : '+e.message}
+  b.disabled=false;snUI();
+};
+$('#snD').oninput=e=>{const v=+e.target.value;SON.d=v>0?v:null;SON.use=!!SON.d;if(SON.use&&mode==='ref')mode='mes';draw()};
+$('#snOff').onclick=()=>{SON.d=null;SON.use=false;$('#snD').value='';if(!ref)mode='ref';draw()};
+$('#snCal').onclick=()=>{
+  if(!ref||!SON.d)return;const W=Math.max(img.width||img.videoWidth,img.height||img.videoHeight),cmpx=(+$('#reflen').value||0)/len(ref),t=cmpx*W/(2*SON.d);
+  if(!(t>0.25&&t<1.6)){note('Calibration impossible : vérifie la distance et la taille du repère.');return}
+  TANH=t;TCAL=true;SON.use=true;try{localStorage.setItem('faito-fov',JSON.stringify({t}))}catch(e){}
+  note(`Caméra calibrée : angle de vue ≈ ${Math.round(2*Math.atan(t)*180/Math.PI)}°. Les prochaines mesures au sonar seront plus justes.`);draw();
+};
 
 /* ---- Sonar : bip + écho (corrélation avec le bip émis) ---- */
 let SA=null;
@@ -974,6 +1035,79 @@ function fStop(){FZ.run=false;FZ.stream&&FZ.stream.getTracks().forEach(t=>t.stop
 $('#fOk').onchange=e=>{$('#fGo').disabled=!e.target.checked;if(!e.target.checked&&FZ.run)fStop()};
 $('#fGo').onclick=()=>FZ.run?fStop():fStart();
 
+/* ---- Vitesse : chrono entre deux lignes, ou suivi d'un objet ---- */
+const VZ={os:[0,0],arm:0,lt:[0,0],ref:null,refPick:0,src:null,run:false,stream:null,file:false,m:'lines',lx:[],bg:[null,null],noise:[2,2],act:[false,false],t1:null,first:-1,hist:[],tpl:null,pos:null,trail:[],max:0,tw:0,last:0};
+const vcv=document.createElement('canvas'),vg=vcv.getContext('2d',{willReadFrequently:true});
+const vNow=()=>VZ.file?$('#vVid').currentTime*1000/Math.max(1,+$('#vSlow').value||1):performance.now()/Math.max(1,+$('#vSlow').value||1);
+function vGray(){const v=$('#vVid'),W=160,H=Math.max(1,Math.round(v.videoHeight/v.videoWidth*W));vcv.width=W;vcv.height=H;vg.drawImage(v,0,0,W,H);
+  const d=vg.getImageData(0,0,W,H).data,g=new Float32Array(W*H);for(let i=0,j=0;j<g.length;i+=4,j++)g[j]=0.3*d[i]+0.59*d[i+1]+0.11*d[i+2];return{g,W,H}}
+const kmh=ms=>(ms*3.6).toFixed(1).replace('.',',')+' km/h';
+function vShow(ms,info){$('#vN').textContent=kmh(ms);$('#vInfo').textContent=info||(ms.toFixed(2).replace('.',',')+' m/s')}
+function vHist(){$('#vHist').innerHTML=VZ.hist.slice(-5).reverse().map((h,i)=>`<li><span>Passage ${VZ.hist.length-i}</span><b>${kmh(h.v)}</b><span>${(h.t/1000).toFixed(2).replace('.',',')} s</span></li>`).join('')}
+function vLines(f){
+  const{g,W,H}=f,y0=Math.round(H*0.1),y1=Math.round(H*0.9),t=vNow();
+  if(VZ.pg&&VZ.pg.length===g.length){const xa=Math.round(Math.min(...VZ.lx)*W),xb=Math.round(Math.max(...VZ.lx)*W);let n=0;for(let y=y0;y<y1;y+=2)for(let x=xa;x<=xb;x+=2)if(Math.abs(g[y*W+x]-VZ.pg[y*W+x])>25)n++;
+    if(n>=3)VZ.mv=t;else if(VZ.first>=0&&t-VZ.mv>1000){VZ.first=-1;$('#vInfo').textContent=''}}
+  VZ.pg=g.slice();
+  VZ.lx.forEach((lx,k)=>{const x=Math.round(lx*W),col=[];for(let y=y0;y<y1;y++)for(let dx=-1;dx<=1;dx++)col.push(g[y*W+Math.min(W-1,Math.max(0,x+dx))]);
+    if(!VZ.bg[k]){VZ.bg[k]=col;return}let s=0;for(let i=0;i<col.length;i++)if(Math.abs(col[i]-VZ.bg[k][i])>25)s++;
+    if(t<(VZ.arm||0)){for(let i=0;i<col.length;i++)VZ.bg[k][i]=0.6*VZ.bg[k][i]+0.4*col[i];return}
+    const thr=Math.max(3,VZ.noise[k]*3+1);let on=s>=thr;
+    if(on&&VZ.act[k]&&t-(VZ.os[k]||t)>2500){VZ.bg[k]=col;on=false}if(on&&!VZ.act[k])VZ.os[k]=t;
+    if(s<=1||(!on&&t-(VZ.lt[k]||0)>1500)){VZ.noise[k]=Math.min(20,0.97*VZ.noise[k]+0.03*s);for(let i=0;i<col.length;i++)VZ.bg[k][i]=0.92*VZ.bg[k][i]+0.08*col[i]}
+    if(on)VZ.lt[k]=t;
+    if(on&&!VZ.act[k]){
+      if(VZ.first<0||k===VZ.first||t-VZ.t1>8000){VZ.first=k;VZ.t1=t;VZ.mv=t;$('#vInfo').textContent='Départ détecté…'}
+      else if(k!==VZ.first){const dt=(t-VZ.t1)/1000,dist=+$('#vDist').value||0;if(dt>0.02&&dist>0){const v=dist/dt;VZ.hist.push({v,t:dt*1000});vShow(v,`${dt.toFixed(2).replace('.',',')} s pour ${String(dist).replace('.',',')} m`);vHist();say(kmh(v).replace(',',' virgule ').replace('km/h','kilomètres heure'))}VZ.first=-1}}
+    VZ.act[k]=on});
+  if(VZ.first>=0&&t-VZ.t1>8000)VZ.first=-1;
+}
+function vTrack(f){
+  if(!VZ.tpl)return;const{g,W,H}=f,R=7,S=14,t=vNow();let best=1e18,bx=VZ.pos.x,by=VZ.pos.y;
+  for(let dy=-S;dy<=S;dy+=1)for(let dx=-S;dx<=S;dx+=1){const cx=Math.round(VZ.pos.x+dx),cy=Math.round(VZ.pos.y+dy);if(cx<R||cy<R||cx>=W-R||cy>=H-R)continue;let s=0,k=0;
+    for(let y=-R;y<=R;y++){const row=(cy+y)*W;for(let x=-R;x<=R;x++){s+=Math.abs(g[row+cx+x]-VZ.tpl[k++])}if(s>best)break}if(s<best){best=s;bx=cx;by=cy}}
+  VZ.pos={x:bx,y:by};let k=0;for(let y=-R;y<=R;y++)for(let x=-R;x<=R;x++){VZ.tpl[k]=0.9*VZ.tpl[k]+0.1*g[(by+y)*W+bx+x];k++}
+  VZ.trail.push({x:bx,y:by,t});while(VZ.trail.length>2&&t-VZ.trail[0].t>600)VZ.trail.shift();
+  const a=VZ.trail[0],b=VZ.trail[VZ.trail.length-1],dt=(b.t-a.t)/1000;
+  if(dt>0.25){const px=Math.hypot(b.x-a.x,b.y-a.y),useRef=$('#vScale').value==='ref',rl=VZ.ref?Math.hypot(VZ.ref[1].x-VZ.ref[0].x,VZ.ref[1].y-VZ.ref[0].y):0;
+    if(useRef&&!rl){$('#vInfo').textContent='Trace d\'abord le repère.';return}
+    const mpx=useRef?(+$('#vRefL').value||0)/rl:2*(+$('#vD').value||0)*TANH/Math.max(W,H),v=px*mpx/dt;VZ.max=Math.max(VZ.max,v);
+    vShow(v,`max ${kmh(VZ.max)} · ${useRef?'échelle : repère':TCAL?'caméra calibrée':'caméra non calibrée'}`);if(t-VZ.last>3000&&v>0.5){VZ.last=t;say(kmh(v).replace(',',' virgule ').replace('km/h','kilomètres heure'))}}
+}
+function vDraw(f){const o=$('#vOv'),W=o.clientWidth,H=o.clientHeight,dp=devicePixelRatio||1;o.width=W*dp;o.height=H*dp;const g=o.getContext('2d');g.setTransform(dp,0,0,dp,0,0);
+  g.font='700 14px Barlow,sans-serif';
+  if(VZ.m==='lines')VZ.lx.forEach((lx,k)=>{const x=lx*W;g.strokeStyle='#000';g.lineWidth=6;g.beginPath();g.moveTo(x,0);g.lineTo(x,H);g.stroke();g.strokeStyle=VZ.act[k]?'#F0E442':(k?'#D55E00':'#009E73');g.lineWidth=3;g.stroke();
+    g.fillStyle='#000a';g.fillRect(x-30,8,60,22);g.fillStyle='#fff';g.textAlign='center';g.fillText(k?'Arrivée':'Départ',x,24)});
+  if(VZ.m==='track'&&VZ.ref&&f&&$('#vScale').value==='ref'){const sx=W/f.W,sy=H/f.H;g.strokeStyle='#000';g.lineWidth=6;g.beginPath();g.moveTo(VZ.ref[0].x*sx,VZ.ref[0].y*sy);g.lineTo(VZ.ref[1].x*sx,VZ.ref[1].y*sy);g.stroke();g.strokeStyle=COL.ref;g.lineWidth=3;g.stroke()}
+  if(VZ.m==='track'&&VZ.refPick&&VZ.refP&&f){const sx=W/f.W,sy=H/f.H;g.fillStyle=COL.ref;g.beginPath();g.arc(VZ.refP.x*sx,VZ.refP.y*sy,7,0,7);g.fill()}
+  if(VZ.m==='track'&&VZ.pos&&f){const sx=W/f.W,sy=H/f.H;g.strokeStyle='#56B4E9';g.lineWidth=3;g.beginPath();VZ.trail.forEach((p,i)=>i?g.lineTo(p.x*sx,p.y*sy):g.moveTo(p.x*sx,p.y*sy));g.stroke();
+    g.strokeStyle='#000';g.lineWidth=5;g.strokeRect(VZ.pos.x*sx-14,VZ.pos.y*sy-14,28,28);g.strokeStyle='#F0E442';g.lineWidth=2.5;g.strokeRect(VZ.pos.x*sx-14,VZ.pos.y*sy-14,28,28)}}
+function vHintUp(){$('#vHint').textContent=!VZ.src?'Lance la caméra ou ouvre une vidéo.':VZ.m==='lines'?(VZ.lx.length<2?`👉 Touche l'image pour placer la ligne ${VZ.lx.length?'d\'arrivée':'de départ'}.`:'Prêt : l\'app chronomètre chaque passage entre les lignes.'):(VZ.refPick?`📏 Touche le ${VZ.refPick===1?'début':'bout'} de l'objet de référence.`:VZ.tpl?'Suivi en cours. Touche un autre objet pour changer.':'👉 Touche l\'objet à suivre.');
+  $('#vDistRow').hidden=$('#vScale').value!=='dist';$('#vRefRow').hidden=$('#vScale').value!=='ref';
+  $('#vLinesOpt').hidden=VZ.m!=='lines';$('#vTrackOpt').hidden=VZ.m!=='track';document.querySelectorAll('#vMeth button').forEach(b=>b.classList.toggle('on',b.dataset.m===VZ.m))}
+let vF=null;
+function vStep(){const v=$('#vVid');if(!v.videoWidth)return;const f=vGray();vF=f;if(VZ.m==='lines'&&VZ.lx.length===2)vLines(f);if(VZ.m==='track')vTrack(f);vDraw(f)}
+function vLoop(){if(!VZ.run)return;const v=$('#vVid');if(!VZ.file||!v.paused)vStep();else vDraw(vF);
+  if(v.requestVideoFrameCallback&&(!VZ.file||!v.paused))v.requestVideoFrameCallback(()=>vLoop());else setTimeout(vLoop,33)}
+function vStop(){VZ.run=false;VZ.stream&&VZ.stream.getTracks().forEach(t=>t.stop());VZ.stream=null;$('#vCam').textContent='Caméra en direct'}
+function vReset(){Object.assign(VZ,{bg:[null,null],noise:[2,2],act:[false,false],first:-1,t1:null,tpl:null,pos:null,trail:[],max:0});$('#vN').textContent='—';$('#vInfo').textContent='';vHintUp()}
+function vBegin(file){VZ.src=$('#vVid');VZ.file=file;VZ.run=true;$('#vStage').hidden=false;vReset();vLoop()}
+$('#vCam').onclick=async()=>{if(VZ.run&&!VZ.file){vStop();return}vStop();
+  try{VZ.stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',frameRate:{ideal:60}},audio:false});const v=$('#vVid');v.removeAttribute('src');v.controls=false;v.srcObject=VZ.stream;await v.play();$('#vCam').textContent='Arrêter la caméra';vBegin(false)}
+  catch(e){$('#vHint').textContent='Caméra bloquée ici : ouvre une vidéo, ou utilise l\'APK.'}};
+$('#vFile').onchange=e=>{const f=e.target.files[0];if(!f)return;vStop();const v=$('#vVid');v.srcObject=null;v.src=URL.createObjectURL(f);v.controls=true;v.onloadeddata=()=>{vBegin(true);v.play().catch(()=>{})}};
+$('#vMeth').onclick=e=>{const b=e.target.closest('button');if(!b)return;VZ.m=b.dataset.m;vReset()};
+$('#vReset').onclick=()=>{VZ.lx=VZ.m==='lines'?[]:VZ.lx;VZ.hist=[];vHist();vReset()};
+$('#vOv').addEventListener('pointerdown',e=>{if(!VZ.src)return;const r=$('#vOv').getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;
+  if(VZ.m==='lines'){if(VZ.lx.length>=2)VZ.lx=[];VZ.lx.push(x);VZ.bg=[null,null];VZ.first=-1;VZ.arm=vNow()+600;VZ.act=[false,false]}
+  else if(VZ.refPick&&vF){const p={x:x*vF.W,y:y*vF.H};if(VZ.refPick===1){VZ.refP=p;VZ.refPick=2}else{VZ.ref=[VZ.refP,p];VZ.refPick=0;VZ.refP=null;VZ.max=0}}
+  else if(vF){const{g,W,H}=vF,R=7,cx=Math.min(W-R-1,Math.max(R,Math.round(x*W))),cy=Math.min(H-R-1,Math.max(R,Math.round(y*H)));VZ.tpl=new Float32Array((2*R+1)**2);let k=0;
+    for(let yy=-R;yy<=R;yy++)for(let xx=-R;xx<=R;xx++)VZ.tpl[k++]=g[(cy+yy)*W+cx+xx];VZ.pos={x:cx,y:cy};VZ.trail=[];VZ.max=0}
+  vHintUp();vDraw(vF)});
+$('#vScale').onchange=()=>{VZ.max=0;vHintUp()};
+$('#vRefBtn').onclick=()=>{if(!VZ.src){vHintUp();return}VZ.refPick=1;VZ.ref=null;vHintUp()};
+vHintUp();
+
 /* ---- Morse + mode sourd : vibrations, flashs, lampe torche ---- */
 const MO={A:'.-',B:'-...',C:'-.-.',D:'-..',E:'.',F:'..-.',G:'--.',H:'....',I:'..',J:'.---',K:'-.-',L:'.-..',M:'--',N:'-.',O:'---',P:'.--.',Q:'--.-',R:'.-.',S:'...',T:'-',U:'..-',V:'...-',W:'.--',X:'-..-',Y:'-.--',Z:'--..',0:'-----',1:'.----',2:'..---',3:'...--',4:'....-',5:'.....',6:'-....',7:'--...',8:'---..',9:'----.','.':'.-.-.-',',':'--..--','?':'..--..','!':'-.-.--',"'":'.----.','-':'-....-','/':'-..-.','@':'.--.-.'};
 const MR=Object.fromEntries(Object.entries(MO).map(([k,v])=>[v,k]));
@@ -1089,7 +1223,7 @@ img=sample();ref={a:{x:415,y:150},b:{x:415,y:760}};lines=[{a:{x:620,y:465},b:{x:
 VW.side={img:sampleSide(),ref:{a:{x:415,y:150},b:{x:415,y:760}},lines:[{a:{x:640,y:465},b:{x:849,y:465}}],mode:'mes',rl:'204'};
 fit();
 /* ---- Menu : chaque outil dans son onglet ---- */
-{const TABS={wbox:'poids',sbox:'sonar',rbox:'radar',lbox:'laser',cbox:'couleur',mbox:'morse',kbox:'compter',fbox:'couleur'};
+{const TABS={wbox:'poids',sbox:'sonar',rbox:'radar',lbox:'laser',cbox:'couleur',mbox:'morse',kbox:'compter',fbox:'couleur',vbox:'vitesse'};
  for(const el of document.querySelector('main').children){if(el.classList.contains('top')||el.classList.contains('motif'))continue;el.dataset.tab=TABS[el.id]||'mesure'}
  let tab='mesure';
  function goTab(t){
@@ -1098,6 +1232,7 @@ fit();
    if(tab==='couleur'&&t!=='couleur'&&CZ.run)cStop();
    if(tab==='couleur'&&t!=='couleur'&&FZ.run)fStop();
    if(tab==='morse'&&t!=='morse'&&MZ.run)mzStop();
+   if(tab==='vitesse'&&t!=='vitesse'&&VZ.run)vStop();
    if(tab==='compter'&&t!=='compter'&&KZ.kind==='cam')kStopLive();
    if(t==='compter')requestAnimationFrame(kDraw);
    tab=t;document.querySelectorAll('[data-tab]').forEach(el=>el.hidden=el.dataset.tab!==t);
