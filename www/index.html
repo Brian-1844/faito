@@ -147,6 +147,12 @@ html.dalto{--tape:#E69F00;--lag:#0072B2}
 #fBanner.al{color:#fff;border-color:transparent}
 .fwarn{background:var(--bg);border-radius:12px;padding:10px 14px;margin:10px 0;border-left:5px solid #D55E00}
 .fwarn li{margin:3px 0}
+#mzStage{position:relative;margin:8px 0}#mzStage[hidden]{display:none}
+#mzVid{display:block;width:100%;border-radius:14px;background:#000}
+#mzOv{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.mzbar{height:14px;border-radius:99px;background:var(--bg);overflow:hidden;border:1px solid var(--line);flex:1}
+.mzbar i{display:block;height:100%;width:0;background:#009E73}
+#mzDot{flex:none;width:22px;height:22px;border-radius:50%;background:#555;border:2px solid var(--line)}#mzDot.on{background:#F0E442;box-shadow:0 0 12px #F0E442}
 @media(prefers-reduced-motion:no-preference){.dot{transition:background .2s}}
 </style>
 </head>
@@ -264,6 +270,12 @@ html.dalto{--tape:#E69F00;--lag:#0072B2}
     <div class="mcode" id="mCode" aria-label="Message en morse"></div>
     <div class="row"><button id="mVib" class="pri">📳 Vibrer</button><button id="mFl">Flash écran</button><button id="mTorch">Lampe torche</button><button id="mStop">Stop</button></div>
     <div class="row" style="align-items:center"><label for="mWpm" style="font-weight:600">Vitesse</label><input id="mWpm" type="range" min="4" max="20" value="8" style="flex:1;accent-color:#009E73" aria-label="Vitesse en mots par minute"><span id="mWpmV">8 mots/min</span></div>
+    <h3 style="font:700 18px 'Barlow Condensed';margin:16px 0 2px">Lire des signaux lumineux avec la caméra</h3>
+    <p class="sub" style="margin:0">Vise une lampe, une torche ou un écran qui clignote en morse : l'app suit le point le plus lumineux et traduit les éclats courts et longs. Touche l'image pour choisir la lumière à suivre.</p>
+    <div class="row"><button id="mzGo" class="pri">📷 Lire avec la caméra</button><button id="mzAuto">Suivi automatique</button></div>
+    <div id="mzStage" hidden><video id="mzVid" playsinline muted></video><canvas id="mzOv"></canvas></div>
+    <div class="row" style="align-items:center;flex-wrap:nowrap"><span id="mzDot" aria-hidden="true"></span><div class="mzbar"><i id="mzBar"></i></div></div>
+    <small id="mzInfo">Caméra arrêtée. Le texte lu s'ajoute dans la zone « Recevoir » ci-dessous.</small>
     <h3 style="font:700 18px 'Barlow Condensed';margin:16px 0 2px">Recevoir : tape le morse</h3>
     <p class="sub" style="margin:0">Appui court = point, appui long = trait. Une petite pause termine la lettre, une longue pause fait un espace.</p>
     <div id="mPad" role="button" tabindex="0" aria-label="Zone pour taper le morse">Appuie ici</div>
@@ -1001,6 +1013,37 @@ $('#mClr').onclick=()=>{mText='';mCur='';mRender()};
 $('#mSay').onclick=()=>say(mText||'Aucun texte',true);
 $('#mSend').onclick=()=>{$('#mTxt').value=mText;mUpd();mPlay(mTimeline($('#mCode').textContent),'vib')};
 mRender();
+/* ---- Morse lu par la caméra : éclats lumineux courts / longs ---- */
+const MZ={run:false,stream:null,on:false,t:0,u:0,lo:255,hi:0,pt:null,tr:null,ended:true,spaced:true};
+const mzc=document.createElement('canvas'),mzg=mzc.getContext('2d',{willReadFrequently:true});
+function mzSample(v){const W=80,H=Math.max(1,Math.round(v.videoHeight/v.videoWidth*W));mzc.width=W;mzc.height=H;mzg.drawImage(v,0,0,W,H);const d=mzg.getImageData(0,0,W,H).data;
+  const lum=(i)=>0.3*d[i]+0.59*d[i+1]+0.11*d[i+2];
+  if(MZ.pt){const cx=Math.round(MZ.pt.x*W),cy=Math.round(MZ.pt.y*H);let m=0;for(let y=Math.max(0,cy-3);y<=Math.min(H-1,cy+3);y++)for(let x=Math.max(0,cx-3);x<=Math.min(W-1,cx+3);x++)m=Math.max(m,lum((y*W+x)*4));return{l:m,x:MZ.pt.x,y:MZ.pt.y}}
+  let m=-1,bi=0;for(let i=0,j=0;i<d.length;i+=4,j++){const l=lum(i);if(l>m){m=l;bi=j}}
+  const p={x:(bi%W+0.5)/W,y:((bi/W|0)+0.5)/H};MZ.tr=MZ.tr&&Math.hypot(MZ.tr.x-p.x,MZ.tr.y-p.y)<0.15?{x:MZ.tr.x*0.7+p.x*0.3,y:MZ.tr.y*0.7+p.y*0.3}:p;return{l:m,...MZ.tr}}
+function mzSym(dur){const u=MZ.u||unit();const s=dur<2*u?'.':'-';const nu=s==='.'?dur:dur/3;const al=(MZ.n=(MZ.n||0)+1)<=6?0.5:0.25;MZ.u=Math.min(600,Math.max(40,(1-al)*u+al*nu));mCur+=s;MZ.ended=false;MZ.spaced=false;mRender()}
+function mzStep(v,now){
+  const s=mzSample(v);MZ.hi=Math.max(s.l,MZ.hi-0.4);MZ.lo=Math.min(s.l,MZ.lo+0.4);const c=MZ.hi-MZ.lo,th=(MZ.hi+MZ.lo)/2,h=c*0.12;
+  $('#mzBar').style.width=Math.min(100,s.l/2.55)+'%';
+  if(c<35){$('#mzInfo').textContent='Signal trop faible : rapproche-toi ou baisse la lumière ambiante.';$('#mzDot').className='';return s}
+  const on=MZ.on?s.l>th-h:s.l>th+h;
+  if(on!==MZ.on){const dur=now-MZ.t;if(MZ.on&&MZ.t)mzSym(dur);MZ.on=on;MZ.t=now}
+  else if(!on&&MZ.t){const u=MZ.u||unit(),off=now-MZ.t;if(!MZ.ended&&off>2.5*u){mEndLetter();MZ.ended=true}if(MZ.ended&&!MZ.spaced&&off>6*u){if(mText&&!mText.endsWith(' '))mText+=' ';MZ.spaced=true;mRender()}}
+  $('#mzDot').className=on?'on':'';const u=MZ.u||unit();$('#mzInfo').textContent=`Lumière ${on?'allumée':'éteinte'} · vitesse estimée ≈ ${Math.round(1200/u)} mots/min`;
+  return s}
+function mzDraw(s){const o=$('#mzOv'),W=o.clientWidth,H=o.clientHeight,dp=devicePixelRatio||1;o.width=W*dp;o.height=H*dp;const g=o.getContext('2d');g.setTransform(dp,0,0,dp,0,0);if(!s)return;
+  for(const[c,w]of[['#000',5],[MZ.on?'#F0E442':'#fff',2.5]]){g.strokeStyle=c;g.lineWidth=w;g.beginPath();g.arc(s.x*W,s.y*H,18,0,7);g.stroke()}
+  g.fillStyle='#000a';g.fillRect(6,6,MZ.pt?150:170,24);g.fillStyle='#fff';g.font='600 13px Barlow,sans-serif';g.fillText(MZ.pt?'Point choisi':'Suivi automatique',12,22)}
+function mzLoop(){if(!MZ.run)return;const v=$('#mzVid');if(v.videoWidth)mzDraw(mzStep(v,performance.now()));requestAnimationFrame(mzLoop)}
+async function mzStart(){try{MZ.stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',frameRate:{ideal:60}},audio:false});const v=$('#mzVid');v.srcObject=MZ.stream;await v.play();
+  try{const tk=MZ.stream.getVideoTracks()[0],cp=tk.getCapabilities&&tk.getCapabilities();if(cp&&cp.exposureMode&&cp.exposureMode.includes('manual'))await tk.applyConstraints({advanced:[{exposureMode:'manual'}]})}catch(e){}
+  Object.assign(MZ,{run:true,on:false,t:0,u:0,n:0,lo:255,hi:0,tr:null,ended:true,spaced:true});$('#mzStage').hidden=false;$('#mzGo').textContent='Arrêter la caméra';say('Lecture du morse par la caméra',false);mzLoop()}
+  catch(e){$('#mzInfo').textContent='Caméra bloquée ici : utilise l\'APK ou la version web.'}}
+function mzStop(){MZ.run=false;MZ.stream&&MZ.stream.getTracks().forEach(t=>t.stop());MZ.stream=null;$('#mzStage').hidden=true;$('#mzGo').textContent='📷 Lire avec la caméra';$('#mzDot').className='';$('#mzInfo').textContent='Caméra arrêtée.';if(mCur)mEndLetter()}
+$('#mzGo').onclick=()=>MZ.run?mzStop():mzStart();
+$('#mzAuto').onclick=()=>{MZ.pt=null;MZ.tr=null};
+$('#mzStage').addEventListener('pointerdown',e=>{const r=$('#mzVid').getBoundingClientRect();MZ.pt={x:(e.clientX-r.left)/r.width,y:(e.clientY-r.top)/r.height};MZ.lo=255;MZ.hi=0});
+
 /* Mode sourd : distance en vibrations (longue = 1 m, courte = 10 cm) + flash */
 function vibDist(cm){const m=Math.floor(cm/100),dm=Math.round((cm-m*100)/10),p=[];
   for(let i=0;i<m;i++)p.push(600,250);if(m&&dm)p[p.length-1]+=350;for(let i=0;i<dm;i++)p.push(150,200);if(!p.length)p.push(150);
@@ -1054,6 +1097,7 @@ fit();
    if(tab==='laser'&&t!=='laser'&&LZ.run)$('#lCam').click();
    if(tab==='couleur'&&t!=='couleur'&&CZ.run)cStop();
    if(tab==='couleur'&&t!=='couleur'&&FZ.run)fStop();
+   if(tab==='morse'&&t!=='morse'&&MZ.run)mzStop();
    if(tab==='compter'&&t!=='compter'&&KZ.kind==='cam')kStopLive();
    if(t==='compter')requestAnimationFrame(kDraw);
    tab=t;document.querySelectorAll('[data-tab]').forEach(el=>el.hidden=el.dataset.tab!==t);
